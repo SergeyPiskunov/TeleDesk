@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import sqlite3 as sqlite
 
+import sqlite3 as sqlite
 
 class DBConnector():
     """ Database wrapper """

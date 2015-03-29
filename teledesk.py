@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 from PyQt4 import QtCore, QtGui
 import main_window, item_edit_dialog
 from db_connector import DBConnector

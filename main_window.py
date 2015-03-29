@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_window.ui'
-#
-# Created: Sun Mar 29 11:58:02 2015
-#      by: PyQt4 UI code generator 4.11.2
-#
-# WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
