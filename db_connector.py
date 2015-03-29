@@ -22,6 +22,10 @@ class DBConnector():
                 cursor.execute(query)
             return cursor.fetchall()
 
+    def execute(self, query):
+        cursor = self.db.cursor()
+        cursor.execute(query)
+        self.db.commit()
 
 if __name__ == "__main__":
     dbc = DBConnector("config.db")

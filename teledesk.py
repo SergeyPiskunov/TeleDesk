@@ -33,6 +33,8 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.doubleClicked.connect(self.init_connection)
         self.ui.treeView.clicked.connect(self.display_item_info)
 
+        self.ui.pushButtonAdd.clicked.connect(self.add_new_item)
+
     def fill_tree(self, dbc, parent, root):
         cildlist = dbc.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parent)
         for chld in cildlist:
@@ -77,23 +79,46 @@ class MyWindow(QtGui.QWidget):
 
         item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
         if item.__len__():
-            inputter = ItemEditDialog(None, item[0])
+            item_data = {"Parent":None, "ItemData":item[0]}
+            inputter = ItemEditDialog(MyWindow.dbc, item_data)
             inputter.exec_()
             #comment = inputter.text.text()
             #print comment
 
+    def add_new_item(self):
+        index = self.ui.treeView.selectedIndexes()[0]
+
+        selected_name = str(index.model().itemFromIndex(index).text())
+        item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
+
+
+        if item.__len__():
+            item_data = {"Parent": str(item[0]["PARENT"]), "ItemData": None}
+            inputter = ItemEditDialog(MyWindow.dbc, item_data)
+            inputter.exec_()
 
 class ItemEditDialog(QtGui.QDialog):
 
-    def __init__(self, parent=None, item_data = None):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, dbc = None, item_data = None):
+        self.dbc = dbc
+        self.parent = item_data["Parent"]
+        QtGui.QWidget.__init__(self, None)
         self.ui = item_edit_dialog.Ui_EditWin()
         self.ui.setupUi(self)
-        self.ui.lineEditName.setText(item_data["ALIAS"])
-        self.ui.lineEditServer.setText(item_data["SERVER"])
-        self.ui.lineEditPort.setText(item_data["PORT"])
-        self.ui.lineEditUser.setText(item_data["USER"])
-        #self.ui.lineEditName.setText(item_data["PASSWORD"])
+        if item_data["Parent"] == None:
+            self.ui.lineEditName.setText(item_data["ItemData"]["ALIAS"])
+            self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
+            self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
+            self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
+            #self.ui.lineEditName.setText(item_data["PASSWORD"])
+        else:
+            self.ui.lineEditName.setText(item_data["Parent"])
+            self.ui.pushButtonSave.clicked.connect(self.create_new_item)
+
+    def create_new_item(self):
+        name = str(self.ui.lineEditName.text())
+        self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , 0)")
+
 
 
 
