@@ -34,6 +34,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.clicked.connect(self.display_item_info)
 
         self.ui.pushButtonAdd.clicked.connect(self.add_new_item)
+        self.ui.pushButtonRemove.clicked.connect(self.remove_item)
 
     def fill_tree(self, dbc, parent, root):
         cildlist = dbc.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parent)
@@ -83,6 +84,8 @@ class MyWindow(QtGui.QWidget):
             inputter = ItemEditDialog(MyWindow.dbc, item_data)
             inputter.exec_()
             #comment = inputter.text.text()
+
+
             #print comment
 
     def add_new_item(self):
@@ -96,10 +99,32 @@ class MyWindow(QtGui.QWidget):
             item_data = {"Parent": str(item[0]["PARENT"]), "ItemData": None}
             inputter = ItemEditDialog(MyWindow.dbc, item_data)
             inputter.exec_()
+            if inputter.updated:
+                model = QtGui.QStandardItemModel()
+                model.setHorizontalHeaderLabels(['Name'])
+                self.ui.treeView.setModel(model)
+                root = QtGui.QStandardItem("Local_storage")
+
+                self.fill_tree(MyWindow.dbc, "1", root)
+                model.appendRow(root)
+                self.ui.treeView.expand(model.indexFromItem(root))
+
+    def remove_item(self):
+        index = self.ui.treeView.selectedIndexes()[0]
+        selected_name = str(index.model().itemFromIndex(index).text())
+        self.dbc.execute("DELETE FROM FOLDERS WHERE NAME = \""+selected_name+"\"")
+        model = QtGui.QStandardItemModel()
+        model.setHorizontalHeaderLabels(['Name'])
+        self.ui.treeView.setModel(model)
+        root = QtGui.QStandardItem("Local_storage")
+        self.fill_tree(MyWindow.dbc, "1", root)
+        model.appendRow(root)
+        self.ui.treeView.expand(model.indexFromItem(root))
 
 class ItemEditDialog(QtGui.QDialog):
 
     def __init__(self, dbc = None, item_data = None):
+        self.updated = False
         self.dbc = dbc
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
@@ -118,6 +143,9 @@ class ItemEditDialog(QtGui.QDialog):
     def create_new_item(self):
         name = str(self.ui.lineEditName.text())
         self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , 0)")
+        self.updated = True
+        self.close()
+
 
 
 
