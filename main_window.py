@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'main_window.ui'
+#
+# Created: Sun Mar 29 11:58:02 2015
+#      by: PyQt4 UI code generator 4.11.2
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+
+class Ui_MainWindow(object):
+    def setupUi(self, MyWin):
+        MyWin.setObjectName(_fromUtf8("MyWin"))
+        MyWin.resize(443, 379)
+        self.verticalLayout = QtGui.QVBoxLayout(MyWin)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.gridLayout = QtGui.QGridLayout()
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.pushButtonAdd = QtGui.QPushButton(MyWin)
+        self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
+        self.gridLayout.addWidget(self.pushButtonAdd, 0, 0, 1, 1)
+        self.treeView = QtGui.QTreeView(MyWin)
+        self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.treeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.gridLayout.addWidget(self.treeView, 1, 0, 1, 3)
+        self.pushButtonRemove = QtGui.QPushButton(MyWin)
+        self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
+        self.gridLayout.addWidget(self.pushButtonRemove, 0, 1, 1, 1)
+        self.textEditDescription = QtGui.QTextEdit(MyWin)
+        self.textEditDescription.setObjectName(_fromUtf8("textEditDescription"))
+        self.gridLayout.addWidget(self.textEditDescription, 1, 3, 1, 1)
+        self.labelStatus = QtGui.QLabel(MyWin)
+        self.labelStatus.setText(_fromUtf8(""))
+        self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
+        self.gridLayout.addWidget(self.labelStatus, 2, 0, 1, 4)
+        self.verticalLayout.addLayout(self.gridLayout)
+
+        self.retranslateUi(MyWin)
+        QtCore.QMetaObject.connectSlotsByName(MyWin)
+
+    def retranslateUi(self, MyWin):
+        MyWin.setWindowTitle(_translate("MyWin", "TeleDesk v0.1", None))
+        self.pushButtonAdd.setText(_translate("MyWin", "Add", None))
+        self.pushButtonRemove.setText(_translate("MyWin", "Remove", None))
+
