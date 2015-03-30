@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 from PyQt4 import QtCore, QtGui
-import main_window, item_edit_dialog
+import main_window, item_edit_dialog, new_folder_dialog
 from db_connector import DBConnector
 
 
@@ -34,6 +34,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.clicked.connect(self.display_item_info)
 
         self.ui.pushButtonAdd.clicked.connect(self.add_new_item)
+        self.ui.pushButtonAddFolder.clicked.connect(self.add_new_folder)
         self.ui.pushButtonRemove.clicked.connect(self.remove_item)
 
     def fill_tree(self, dbc, parent, root):
@@ -80,24 +81,37 @@ class MyWindow(QtGui.QWidget):
 
         item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
         if item.__len__():
-            item_data = {"Parent":None, "ItemData":item[0]}
+            item_data = {"Parent":None, "ItemData":item[0], "Mode": "Edit"}
             inputter = ItemEditDialog(MyWindow.dbc, item_data)
             inputter.exec_()
             #comment = inputter.text.text()
-
-
             #print comment
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
-
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
-
-
+        item = MyWindow.dbc.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", selected_name)
         if item.__len__():
-            item_data = {"Parent": str(item[0]["PARENT"]), "ItemData": None}
+            item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddItem"}
             inputter = ItemEditDialog(MyWindow.dbc, item_data)
+            inputter.exec_()
+            if inputter.updated:
+                model = QtGui.QStandardItemModel()
+                model.setHorizontalHeaderLabels(['Name'])
+                self.ui.treeView.setModel(model)
+                root = QtGui.QStandardItem("Local_storage")
+
+                self.fill_tree(MyWindow.dbc, "1", root)
+                model.appendRow(root)
+                self.ui.treeView.expand(model.indexFromItem(root))
+
+    def add_new_folder(self):
+        index = self.ui.treeView.selectedIndexes()[0]
+        selected_name = str(index.model().itemFromIndex(index).text())
+        item = MyWindow.dbc.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", selected_name)
+        if item.__len__():
+            item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddFolder"}
+            inputter = NewFolderDialog(MyWindow.dbc, item_data)
             inputter.exec_()
             if inputter.updated:
                 model = QtGui.QStandardItemModel()
@@ -123,30 +137,62 @@ class MyWindow(QtGui.QWidget):
 
 class ItemEditDialog(QtGui.QDialog):
 
-    def __init__(self, dbc = None, item_data = None):
+    def __init__(self, dbc=None, item_data=None):
         self.updated = False
         self.dbc = dbc
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
         self.ui = item_edit_dialog.Ui_EditWin()
         self.ui.setupUi(self)
-        if item_data["Parent"] == None:
+        if item_data["Mode"] == "Edit":
             self.ui.lineEditName.setText(item_data["ItemData"]["ALIAS"])
             self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
             self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
             self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
             #self.ui.lineEditName.setText(item_data["PASSWORD"])
-        else:
-            self.ui.lineEditName.setText(item_data["Parent"])
+        elif item_data["Mode"] == "AddItem":
+            #self.ui.lineEditName.setText(item_data["Parent"])
             self.ui.pushButtonSave.clicked.connect(self.create_new_item)
+        else:
+            pass
 
     def create_new_item(self):
         name = str(self.ui.lineEditName.text())
-        self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , 0)")
+        server = str(self.ui.lineEditServer.text())
+        user = str(self.ui.lineEditUser.text())
+        port = str(self.ui.lineEditPort.text())
+        self.dbc.execute("INSERT INTO `PROFILES`(`Name`,`Alias`,`Server`,`Port`,`User`) VALUES (\""+name+"\",\""+ name +"\",\""+ server +"\",\""+ port +"\",\""+ user +"\")")
+
+
+        item = MyWindow.dbc.get_data("SELECT ID FROM PROFILES WHERE NAME = ?", name)
+        if item.__len__():
+            id = str(item[0]["ID"])
+            self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , "+id+")")
+            self.updated = True
+            self.close()
+
+
+
+
+class NewFolderDialog(QtGui.QDialog):
+    def __init__(self, dbc=None, item_data=None):
+        self.updated = False
+        self.dbc = dbc
+        self.parent = item_data["Parent"]
+        QtGui.QWidget.__init__(self, None)
+        self.ui = new_folder_dialog.Ui_NewFolderWin()
+        self.ui.setupUi(self)
+        self.ui.pushButtonOk.clicked.connect(self.ok)
+        self.ui.pushButtonCancel.clicked.connect(self.cancel)
+
+    def ok(self):
+        name = str(self.ui.lineEditFolderName.text())
+        self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , '')")
         self.updated = True
         self.close()
 
-
+    def cancel(self):
+        self.close()
 
 
 
