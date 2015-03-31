@@ -1,44 +1,48 @@
 # encoding: utf-8
 
-from PyQt4 import QtCore, QtGui
-import main_window, item_edit_dialog, new_folder_dialog
+from PyQt4 import QtGui
+import main_window
+import item_edit_dialog
+import new_folder_dialog
 from db_connector import DBConnector
+from data_storage import DataStorage
 
 
 class MyWindow(QtGui.QWidget):
     """ UI class"""
-    dbc = DBConnector("config.db")
+    #dbc = DBConnector("config.db")
 
     def __init__(self, parent=None):
+
+        #list of data sources
+        so = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
+        #so2 = {"Name": "Common_storage", "Type": "common", "Path": "config.db"}
+        sources = [so]
+        self.ds = DataStorage(sources)
+
         # GUI
         QtGui.QWidget.__init__(self, parent)
         self.ui = main_window.Ui_MainWindow()
         self.ui.setupUi(self)
-
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
-
         self.ui.treeView.setModel(model)
-
-
         root = QtGui.QStandardItem("Local_storage")
-        self.fill_tree(MyWindow.dbc, "1", root)
+        self.fill_tree("1", root)
         model.appendRow(root)
         self.ui.treeView.expand(model.indexFromItem(root))
-
-
         #model = QtGui.QStandardItemModel()
         #self.ui.treeView.setModel(model)
-
         self.ui.treeView.doubleClicked.connect(self.init_connection)
         self.ui.treeView.clicked.connect(self.display_item_info)
-
         self.ui.pushButtonAdd.clicked.connect(self.add_new_item)
         self.ui.pushButtonAddFolder.clicked.connect(self.add_new_folder)
         self.ui.pushButtonRemove.clicked.connect(self.remove_item)
 
-    def fill_tree(self, dbc, parent, root):
-        cildlist = dbc.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parent)
+
+    def fill_tree(self, parent, root):
+        cildlist = self.ds.get_folders_children("Local_storage", parent)
+
         for chld in cildlist:
             child_node = QtGui.QStandardItem(str(chld["NAME"]))
 
@@ -55,11 +59,12 @@ class MyWindow(QtGui.QWidget):
 
             self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
 
-            self.fill_tree(dbc, str(chld["ID"]), child_node)
+            self.fill_tree(str(chld["ID"]), child_node)
 
     def display_item_info(self, index):
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
+        item = self.ds.get_profile_info("Local_storage", selected_name)
+
         if item.__len__():
             alias = str(item[0]["ALIAS"])
             server = str(item[0]["SERVER"])
@@ -74,26 +79,19 @@ class MyWindow(QtGui.QWidget):
 
     def init_connection(self, index):
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
+        item = self.ds.get_profile_info("Local_storage", selected_name)
         if item.__len__():
-            self.ui.labelStatus.setText(str(item[0]["PARENT"]))
-        #INSERT INTO `FOLDERS`(`ID`,`Parent`,`Name`,`Profile`) VALUES (14, 1, "new", 1);
-
-        item = MyWindow.dbc.get_data("SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.NAME = ?", selected_name)
-        if item.__len__():
-            item_data = {"Parent":None, "ItemData":item[0], "Mode": "Edit"}
-            inputter = ItemEditDialog(MyWindow.dbc, item_data)
-            inputter.exec_()
-            #comment = inputter.text.text()
-            #print comment
+            item_data = {"Parent": None, "ItemData": item[0], "Mode": "Edit"}
+            input_dialog = ItemEditDialog(item_data)
+            input_dialog.exec_()
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = MyWindow.dbc.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", selected_name)
+        item = self.ds.get_folder_id("Local_storage", selected_name)
         if item.__len__():
             item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddItem"}
-            inputter = ItemEditDialog(MyWindow.dbc, item_data)
+            inputter = ItemEditDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
                 model = QtGui.QStandardItemModel()
@@ -101,45 +99,46 @@ class MyWindow(QtGui.QWidget):
                 self.ui.treeView.setModel(model)
                 root = QtGui.QStandardItem("Local_storage")
 
-                self.fill_tree(MyWindow.dbc, "1", root)
+                self.fill_tree("1", root)
                 model.appendRow(root)
                 self.ui.treeView.expand(model.indexFromItem(root))
 
     def add_new_folder(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = MyWindow.dbc.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", selected_name)
+        item = self.ds.get_folder_id("Local_storage", selected_name)
         if item.__len__():
             item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddFolder"}
-            inputter = NewFolderDialog(MyWindow.dbc, item_data)
+            inputter = NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
                 model = QtGui.QStandardItemModel()
                 model.setHorizontalHeaderLabels(['Name'])
                 self.ui.treeView.setModel(model)
                 root = QtGui.QStandardItem("Local_storage")
-
-                self.fill_tree(MyWindow.dbc, "1", root)
+                self.fill_tree("1", root)
                 model.appendRow(root)
                 self.ui.treeView.expand(model.indexFromItem(root))
 
     def remove_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
-        self.dbc.execute("DELETE FROM FOLDERS WHERE NAME = \""+selected_name+"\"")
-        model = QtGui.QStandardItemModel()
-        model.setHorizontalHeaderLabels(['Name'])
-        self.ui.treeView.setModel(model)
-        root = QtGui.QStandardItem("Local_storage")
-        self.fill_tree(MyWindow.dbc, "1", root)
-        model.appendRow(root)
-        self.ui.treeView.expand(model.indexFromItem(root))
+        if selected_name != "Local_storage":
+            self.ds.delete_folder("Local_storage", selected_name)
+            model = QtGui.QStandardItemModel()
+            model.setHorizontalHeaderLabels(['Name'])
+            self.ui.treeView.setModel(model)
+            root = QtGui.QStandardItem("Local_storage")
+            self.fill_tree("1", root)
+            model.appendRow(root)
+            self.ui.treeView.expand(model.indexFromItem(root))
+
 
 class ItemEditDialog(QtGui.QDialog):
 
-    def __init__(self, dbc=None, item_data=None):
+    def __init__(self, ds, item_data=None):
+        self.ds = ds
         self.updated = False
-        self.dbc = dbc
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
         self.ui = item_edit_dialog.Ui_EditWin()
@@ -161,33 +160,32 @@ class ItemEditDialog(QtGui.QDialog):
         server = str(self.ui.lineEditServer.text())
         user = str(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
-        self.dbc.execute("INSERT INTO `PROFILES`(`Name`,`Alias`,`Server`,`Port`,`User`) VALUES (\""+name+"\",\""+ name +"\",\""+ server +"\",\""+ port +"\",\""+ user +"\")")
+        self.ds.create_new_profile("Local_storage", name, server, port, user)
 
-
-        item = MyWindow.dbc.get_data("SELECT ID FROM PROFILES WHERE NAME = ?", name)
+        item = self.ds.get_profile_id("Local_storage", name)
         if item.__len__():
             id = str(item[0]["ID"])
-            self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , "+id+")")
+            self.ds.create_new_profile_folder("Local_storage", self.parent, name, id)
             self.updated = True
             self.close()
 
 
-
-
 class NewFolderDialog(QtGui.QDialog):
-    def __init__(self, dbc=None, item_data=None):
+
+    def __init__(self, ds, item_data=None):
         self.updated = False
-        self.dbc = dbc
+        self.ds = ds
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
         self.ui = new_folder_dialog.Ui_NewFolderWin()
         self.ui.setupUi(self)
         self.ui.pushButtonOk.clicked.connect(self.ok)
         self.ui.pushButtonCancel.clicked.connect(self.cancel)
+        self.ui.labelParentName.setText("/"+str(self.parent))
 
     def ok(self):
         name = str(self.ui.lineEditFolderName.text())
-        self.dbc.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("+self.parent+",\""+ name +"\" , '')")
+        self.ds.create_new_folder("Local_storage", self.parent, name)
         self.updated = True
         self.close()
 
@@ -203,3 +201,5 @@ if __name__ == "__main__":
     window.move(app.desktop().screen().rect().center() - window.rect().center())
     window.show()
     sys.exit(app.exec_())
+    #INSERT INTO `FOLDERS`(`ID`,`Parent`,`Name`,`Profile`) VALUES (14, 1, "new", 1);
+
