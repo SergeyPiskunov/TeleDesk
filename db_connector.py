@@ -2,10 +2,12 @@
 
 import sqlite3 as sqlite
 
-class DBConnector():
+
+class DBConnector:
     """ Database wrapper """
 
     def __init__(self, db_file):
+        self.db_file = db_file
         self.db = sqlite.connect(db_file)
 
     def create_blank_base(self):
