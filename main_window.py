@@ -42,9 +42,6 @@ class Ui_MainWindow(object):
         self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
         self.gridLayout.addWidget(self.pushButtonRemove, 0, 3, 1, 1)
 
-
-
-
         self.treeView = QtGui.QTreeView(MyWin)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.treeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
@@ -68,5 +65,6 @@ class Ui_MainWindow(object):
         self.pushButtonAddFolder.setText(_translate("MyWin", "Add folder", None))
         self.pushButtonEdit.setText(_translate("MyWin", "Edit", None))
         self.pushButtonRemove.setText(_translate("MyWin", "Remove", None))
+
 
 

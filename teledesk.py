@@ -4,7 +4,7 @@ import main_window
 import item_edit_dialog
 import new_folder_dialog
 from data_storage import DataStorage
-
+from serializer import Serializer
 
 class MyWindow(QtGui.QWidget):
     """ UI class"""
@@ -82,7 +82,8 @@ class MyWindow(QtGui.QWidget):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         item = self.ds.get_profile_info("Local_storage", selected_id)
         if item.__len__():
-            pass
+            te = Serializer().serialize_to_text_win_rdp(item[0], "7.1")
+            self.ui.textEditDescription.setText(te)
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
