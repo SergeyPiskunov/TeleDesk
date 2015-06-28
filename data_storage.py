@@ -50,6 +50,15 @@ class DataStorage():
             + port + "\",\""
             + user + "\")")
 
+    def update_profile(self, database, id, name, server, port, user):
+        source = self.data_bases.get(database)
+        source.execute("UPDATE `PROFILES` SET "
+                       "  'Alias'='" + name +
+                       "','SERVER'='" + server +
+                       "','PORT'='" + port +
+                       "','USER'='" + user +
+                       "' WHERE ID =" + str(id))
+
     def create_new_profile_folder(self, database, parent, name, id):
         source = self.data_bases.get(database)
         source.execute(
@@ -66,10 +75,13 @@ class DataStorage():
 
     def delete_folder(self, database, idd):
         source = self.data_bases.get(database)
-        source.execute("DELETE FROM PROFILES WHERE PROFILES.ID IN (SELECT PROFILES.ID FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.ID = \""+ idd + "\")")
+        source.execute("DELETE FROM PROFILES WHERE PROFILES.ID IN "
+                       "(SELECT PROFILES.ID FROM PROFILES LEFT JOIN FOLDERS "
+                       "ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.ID = \"" + idd + "\")")
 
-        source.execute("DELETE FROM FOLDERS WHERE ID = \""+ idd + "\"")
-
+        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT FOLDERS.PROFILE FROM FOLDERS WHERE FOLDERS.ID = \"" + idd + "\")")
+        source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+        source.execute("DELETE FROM FOLDERS WHERE PARENT = \"" + idd + "\"")
 
 if __name__ == "__main__":
     pass

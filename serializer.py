@@ -1,5 +1,5 @@
-#import win32crypt
-#import binascii
+import win32crypt
+import binascii
 
 
 class Serializer:
@@ -23,17 +23,21 @@ class Serializer:
 
         #password
         if connection_params["PASSWORD"] != u'':
-            #pwdHash = win32crypt.CryptProtectData(u"LSzx38$",u'psw',None,None,None,0)
-            #print binascii.hexlify(pwdHash)
-            prepared_params.append("password 51:b:"+connection_params["PASSWORD"])
+            pwdHash = win32crypt.CryptProtectData(connection_params["PASSWORD"], u'psw', None, None, None, 0)
+            pwd = binascii.hexlify(pwdHash)
+            prepared_params.append("password 51:b:"+pwd)
+
+        #domain
+        if connection_params["DOMAIN"] != u'':
+            prepared_params.append("domain:s:"+connection_params["DOMAIN"])
 
         serialized_item = "\n".join(prepared_params)
         return serialized_item
 
     @staticmethod
-    def serialize_to_file_win_rdp(connection_params, filename):
+    def serialize_to_file_win_rdp(connection_params, protocol_version, filename):
 
-        serialized_text = Serializer.serialize_to_text(connection_params)
+        serialized_text = Serializer.serialize_to_text_win_rdp(connection_params, protocol_version)
         with open(filename, "w") as s_file:
             s_file.write(serialized_text)
             s_file.close()

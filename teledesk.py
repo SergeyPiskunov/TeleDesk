@@ -3,6 +3,7 @@ from PyQt4 import QtGui, QtCore
 import main_window
 import item_edit_dialog
 import new_folder_dialog
+import os
 from data_storage import DataStorage
 from serializer import Serializer
 
@@ -12,36 +13,39 @@ class MyWindow(QtGui.QWidget):
 
         #list of data sources
         so = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
-        so2 = {"Name": "Common_storage", "Type": "common", "Path": "config.db"}
-        sources = [so, so2]
-        self.ds = DataStorage(sources)
+        so2 = {"Name": "Common_storage", "Type": "common", "Path": "config2.db"}
+        self.sources = [so, so2]
+        self.ds = DataStorage(self.sources)
 
         # GUI
         QtGui.QWidget.__init__(self, parent)
         self.ui = main_window.Ui_MainWindow()
         self.ui.setupUi(self)
 
+
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
         self.ui.treeView.setModel(model)
         self.ui.treeView.setColumnHidden(1, True)
+        self.ui.treeView.header().close()
 
-        #for s in sources:
-        root = QtGui.QStandardItem("Local_storage")
-        self.fill_tree("1", root)
-        model.appendRow(root)
-        self.ui.treeView.expand(model.indexFromItem(root))
+        for stor in self.sources:
+            root = QtGui.QStandardItem(stor["Name"])
+            self.fill_tree(stor["Name"],"1", root)
+            model.appendRow(root)
+            self.ui.treeView.expand(model.indexFromItem(root))
 
 
         self.ui.treeView.doubleClicked.connect(self.init_connection)
         self.ui.treeView.clicked.connect(self.display_item_info)
-        self.ui.pushButtonAdd.clicked.connect(self.add_new_item)
-        self.ui.pushButtonAddFolder.clicked.connect(self.add_new_folder)
-        self.ui.pushButtonEdit.clicked.connect(self.edit_item)
-        self.ui.pushButtonRemove.clicked.connect(self.remove_item)
+        self.ui.deleteGroupAction.triggered.connect(self.remove_item)
+        self.ui.editServerAction.triggered.connect(self.edit_item)
+        self.ui.addGroupAction.triggered.connect(self.add_new_folder)
+        self.ui.addServerAction.triggered.connect(self.add_new_item)
+        self.ui.removeServerAction.triggered.connect(self.remove_item)
 
-    def fill_tree(self, parent, root):
-        cildlist = self.ds.get_folders_children("Local_storage", parent)
+    def fill_tree(self, storage, parent, root):
+        cildlist = self.ds.get_folders_children(storage, parent)
 
         for chld in cildlist:
             child_node = QtGui.QStandardItem(str(chld["NAME"]))
@@ -59,12 +63,21 @@ class MyWindow(QtGui.QWidget):
             root.appendRow(child_node)
             self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
 
-            self.fill_tree(str(chld["ID"]), child_node)
+            self.fill_tree(storage, str(chld["ID"]), child_node)
 
     def display_item_info(self, index):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
+
+        p = index.model().itemFromIndex(index).parent()
+        while p:
+            if not p.parent():
+                storage_name = str(p.text())
+            p = p.parent()
+
+
+
         if selected_id:
-            item = self.ds.get_profile_info("Local_storage", selected_id)
+            item = self.ds.get_profile_info(storage_name, selected_id)
 
             if item.__len__():
                 alias = str(item[0]["ALIAS"])
@@ -82,83 +95,123 @@ class MyWindow(QtGui.QWidget):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         item = self.ds.get_profile_info("Local_storage", selected_id)
         if item.__len__():
-            te = Serializer().serialize_to_text_win_rdp(item[0], "7.1")
-            self.ui.textEditDescription.setText(te)
+            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", "test.rdp")
+            if te:
+                os.system("test.rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-        item = self.ds.get_profile_info("Local_storage", selected_id)
+
+        p = index.model().itemFromIndex(index).parent()
+        while p:
+            if not p.parent():
+                storage_name = str(p.text())
+            p = p.parent()
+
+
+
+        item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            item_data = {"Parent": None, "ItemData": item[0], "Mode": "Edit"}
+            item_data = {"Storage": storage_name, "Parent": None, "ItemData": item[0], "Mode": "Edit"}
             input_dialog = ItemEditDialog(self.ds, item_data)
+            input_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
             input_dialog.exec_()
+            if input_dialog.updated:
+                model = QtGui.QStandardItemModel()
+                model.setHorizontalHeaderLabels(['Name'])
+                self.ui.treeView.setModel(model)
+                for stor in self.sources:
+                    root = QtGui.QStandardItem(stor["Name"])
+                    self.fill_tree(stor["Name"], "1", root)
+                    model.appendRow(root)
+                    self.ui.treeView.expand(model.indexFromItem(root))
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = self.ds.get_folder_id("Local_storage", selected_name)
+        storage_name = str(index.model().itemFromIndex(index).parent().text())
+
+
+        item = self.ds.get_folder_id(storage_name, selected_name)
+
         if item.__len__():
-            item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddItem"}
-            inputter = ItemEditDialog(self.ds, item_data)
-            inputter.exec_()
-            if inputter.updated:
+            item_data = {"Storage": storage_name, "Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddItem"}
+            input_dialog = ItemEditDialog(self.ds, item_data)
+            input_dialog.exec_()
+            if input_dialog.updated:
                 model = QtGui.QStandardItemModel()
                 model.setHorizontalHeaderLabels(['Name'])
                 self.ui.treeView.setModel(model)
-                root = QtGui.QStandardItem("Local_storage")
-
-                self.fill_tree("1", root)
-                model.appendRow(root)
-                self.ui.treeView.expand(model.indexFromItem(root))
+                for stor in self.sources:
+                    root = QtGui.QStandardItem(stor["Name"])
+                    self.fill_tree(stor["Name"], "1", root)
+                    model.appendRow(root)
+                    self.ui.treeView.expand(model.indexFromItem(root))
 
     def add_new_folder(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
-        item = self.ds.get_folder_id("Local_storage", selected_name)
+        storage_name = str(index.model().itemFromIndex(index).text())
+
+        item = self.ds.get_folder_id(storage_name, selected_name)
         if item.__len__():
-            item_data = {"Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddFolder"}
+            item_data = {"Storage": storage_name, "Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddFolder"}
             inputter = NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
                 model = QtGui.QStandardItemModel()
                 model.setHorizontalHeaderLabels(['Name'])
                 self.ui.treeView.setModel(model)
-                root = QtGui.QStandardItem("Local_storage")
-                self.fill_tree("1", root)
-                model.appendRow(root)
-                self.ui.treeView.expand(model.indexFromItem(root))
+                for stor in self.sources:
+                    root = QtGui.QStandardItem(stor["Name"])
+                    self.fill_tree(stor["Name"], "1", root)
+                    model.appendRow(root)
+                    self.ui.treeView.expand(model.indexFromItem(root))
 
     def remove_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-        #selected_name = str(index.model().itemFromIndex(index).text())
+
+        p = index.model().itemFromIndex(index).parent()
+        while p:
+            if not p.parent():
+                storage_name = str(p.text())
+            p = p.parent()
+
         if selected_id != "1":
-            self.ds.delete_folder("Local_storage", selected_id)
+            self.ds.delete_folder(storage_name, selected_id)
             model = QtGui.QStandardItemModel()
             model.setHorizontalHeaderLabels(['Name'])
             self.ui.treeView.setModel(model)
-            root = QtGui.QStandardItem("Local_storage")
-            self.fill_tree("1", root)
-            model.appendRow(root)
-            self.ui.treeView.expand(model.indexFromItem(root))
-
+            #root = QtGui.QStandardItem("Local_storage")
+            #self.fill_tree("1", root)
+            #model.appendRow(root)
+            #self.ui.treeView.expand(model.indexFromItem(root))
+            for stor in self.sources:
+                root = QtGui.QStandardItem(stor["Name"])
+                self.fill_tree(stor["Name"], "1", root)
+                model.appendRow(root)
+                self.ui.treeView.expand(model.indexFromItem(root))
 
 class ItemEditDialog(QtGui.QDialog):
 
     def __init__(self, ds, item_data=None):
         self.ds = ds
+        self.storage_name = item_data["Storage"]
         self.updated = False
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
         self.ui = item_edit_dialog.Ui_EditWin()
         self.ui.setupUi(self)
         if item_data["Mode"] == "Edit":
+            self.item_to_edit = item_data["ItemData"]["ID"]
             self.ui.lineEditName.setText(item_data["ItemData"]["ALIAS"])
             self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
             self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
             self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
             #self.ui.lineEditName.setText(item_data["PASSWORD"])
+            self.ui.pushButtonSave.clicked.connect(self.edit_item)
         elif item_data["Mode"] == "AddItem":
             #self.ui.lineEditName.setText(item_data["Parent"])
             self.ui.pushButtonSave.clicked.connect(self.create_new_item)
@@ -170,14 +223,22 @@ class ItemEditDialog(QtGui.QDialog):
         server = str(self.ui.lineEditServer.text())
         user = str(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
-        self.ds.create_new_profile("Local_storage", name, server, port, user)
+        self.ds.create_new_profile(self.storage_name, name, server, port, user)
 
-        item = self.ds.get_profile_id("Local_storage", name)
+        item = self.ds.get_profile_id(self.storage_name, name)
         if item.__len__():
             id = str(item[0]["ID"])
-            self.ds.create_new_profile_folder("Local_storage", self.parent, name, id)
+            self.ds.create_new_profile_folder(self.storage_name, self.parent, name, id)
             self.updated = True
             self.close()
+
+    def edit_item(self):
+        name = str(self.ui.lineEditName.text())
+        server = str(self.ui.lineEditServer.text())
+        user = str(self.ui.lineEditUser.text())
+        port = str(self.ui.lineEditPort.text())
+        self.ds.update_profile(self.storage_name, self.item_to_edit,  name, server, port, user)
+        self.close()
 
 
 class NewFolderDialog(QtGui.QDialog):
@@ -185,6 +246,7 @@ class NewFolderDialog(QtGui.QDialog):
     def __init__(self, ds, item_data=None):
         self.updated = False
         self.ds = ds
+        self.storage = item_data["Storage"]
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
         self.ui = new_folder_dialog.Ui_NewFolderWin()
@@ -195,7 +257,7 @@ class NewFolderDialog(QtGui.QDialog):
 
     def ok(self):
         name = str(self.ui.lineEditFolderName.text())
-        self.ds.create_new_folder("Local_storage", self.parent, name)
+        self.ds.create_new_folder(self.storage, self.parent, name)
         self.updated = True
         self.close()
 
