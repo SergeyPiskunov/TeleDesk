@@ -15,7 +15,6 @@ TeleDesk helps you to securely store, use and share a big amount of remote deskt
 
 - core
 - main window UI
-- 
 
 ###### To do:
 
