@@ -73,15 +73,24 @@ class DataStorage():
                        + parent + ",\""
                        + name + "\" , '')")
 
+    def get_child_elements(self, database, idd):
+        source = self.data_bases.get(database)
+        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)", idd)
+
     def delete_folder(self, database, idd):
         source = self.data_bases.get(database)
-        source.execute("DELETE FROM PROFILES WHERE PROFILES.ID IN "
-                       "(SELECT PROFILES.ID FROM PROFILES LEFT JOIN FOLDERS "
-                       "ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.ID = \"" + idd + "\")")
 
-        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT FOLDERS.PROFILE FROM FOLDERS WHERE FOLDERS.ID = \"" + idd + "\")")
-        source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+        #deleting all child profiles
+        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = \"" + idd + "\")")
+        #deleting all child folders
         source.execute("DELETE FROM FOLDERS WHERE PARENT = \"" + idd + "\"")
+
+        #deleting folder
+        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE ID = \"" + idd + "\")")
+
+        #deleting profile
+        source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+
 
 if __name__ == "__main__":
     pass

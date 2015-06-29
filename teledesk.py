@@ -7,6 +7,7 @@ import os
 from data_storage import DataStorage
 from serializer import Serializer
 
+
 class MyWindow(QtGui.QWidget):
     """ UI class"""
     def __init__(self, parent=None):
@@ -69,11 +70,8 @@ class MyWindow(QtGui.QWidget):
         else: 
             return super(MyWindow, self).event(event)
 
-        
     def closeEvent(self, event):
-        reply = QtGui.QMessageBox.question(
-            self,
-            'Message',"Are you sure to quit?",
+        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
             QtGui.QMessageBox.No)
 
@@ -83,6 +81,14 @@ class MyWindow(QtGui.QWidget):
             self.tray_icon.show()
             self.hide()
             event.ignore()
+
+    def keyPressEvent(self, event):
+        #DEL key
+        if event.key() == 16777223:
+            self.remove_item()
+        #elif event.key() == 16777222:
+        #    self.remove_item()
+
 
     def restore_window(self, reason):
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
@@ -184,7 +190,6 @@ class MyWindow(QtGui.QWidget):
         selected_name = str(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).parent().text())
 
-
         item = self.ds.get_folder_id(storage_name, selected_name)
 
         if item.__len__():
@@ -232,19 +237,27 @@ class MyWindow(QtGui.QWidget):
             p = p.parent()
 
         if selected_id != "1":
-            self.ds.delete_folder(storage_name, selected_id)
+
+            #if there are child elements, asking user before deleting
+            child_elements = self.ds.get_child_elements(storage_name, selected_id)
+            if child_elements.__len__():
+                reply = QtGui.QMessageBox.question(self, 'Message', "Delete all child elements?",
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.Yes:
+                    self.ds.delete_folder(storage_name, selected_id)
+            else:
+                self.ds.delete_folder(storage_name, selected_id)
+
             model = QtGui.QStandardItemModel()
             model.setHorizontalHeaderLabels(['Name'])
             self.ui.treeView.setModel(model)
-            #root = QtGui.QStandardItem("Local_storage")
-            #self.fill_tree("1", root)
-            #model.appendRow(root)
-            #self.ui.treeView.expand(model.indexFromItem(root))
             for stor in self.sources:
                 root = QtGui.QStandardItem(stor["Name"])
                 self.fill_tree(stor["Name"], "1", root)
                 model.appendRow(root)
                 self.ui.treeView.expand(model.indexFromItem(root))
+
 
 class ItemEditDialog(QtGui.QDialog):
 
@@ -315,7 +328,6 @@ class NewFolderDialog(QtGui.QDialog):
 
     def cancel(self):
         self.close()
-
 
 
 if __name__ == "__main__":
