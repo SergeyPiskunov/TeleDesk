@@ -11,6 +11,7 @@ class MyWindow(QtGui.QWidget):
     """ UI class"""
     def __init__(self, parent=None):
 
+        super(MyWindow, self).__init__()
         #list of data sources
         so = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
         so2 = {"Name": "Common_storage", "Type": "common", "Path": "config2.db"}
@@ -44,6 +45,57 @@ class MyWindow(QtGui.QWidget):
         self.ui.addServerAction.triggered.connect(self.add_new_item)
         self.ui.removeServerAction.triggered.connect(self.remove_item)
 
+        
+        #Minimizing to tray
+        style = self.style()
+        # Set the window and tray icon to something
+        icon = style.standardIcon(QtGui.QStyle.SP_ComputerIcon)
+        self.tray_icon = QtGui.QSystemTrayIcon()
+        self.tray_icon.setIcon(QtGui.QIcon(icon))
+        self.setWindowIcon(QtGui.QIcon(icon))
+        # Restore the window when the tray icon is double clicked.
+        self.tray_icon.activated.connect(self.restore_window)
+    
+    def event(self, event):    
+        if (event.type() == QtCore.QEvent.WindowStateChange and 
+                self.isMinimized()):
+            # The window is already minimized at this point.  AFAIK,
+            # there is no hook stop a minimize event. Instead,
+            # removing the Qt.Tool flag should remove the window
+            # from the taskbar.
+            self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.Tool)
+            self.tray_icon.show()
+            return True
+        else: 
+            return super(MyWindow, self).event(event)
+
+        
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(
+            self,
+            'Message',"Are you sure to quit?",
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+            QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            self.tray_icon.show()
+            self.hide()
+            event.ignore()
+
+    def restore_window(self, reason):
+        if reason == QtGui.QSystemTrayIcon.DoubleClick:
+            self.tray_icon.hide()
+            # self.showNormal will restore the window even if it was
+            # minimized.
+            self.showNormal()
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            self.tray_icon.hide()
+            # self.showNormal will restore the window even if it was
+            # minimized.
+            self.showNormal()   
+        
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
 
