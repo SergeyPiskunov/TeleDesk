@@ -8,6 +8,7 @@ TeleDesk helps you to securely store, use and share a big amount of remote deskt
 
 ####Architecture:
 
+https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/edit?usp=sharing
 
 ##### Feature list:
 
@@ -19,5 +20,7 @@ TeleDesk helps you to securely store, use and share a big amount of remote deskt
 ###### To do:
 
 - database encryption
-- quicklaunch window
-- 
+- quicklaunch window UI
+- Google Drive support
+- import/export to *.rdp
+- multilanguage UI
