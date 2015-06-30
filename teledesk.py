@@ -8,6 +8,7 @@ from data_storage import DataStorage
 from serializer import Serializer
 import win32crypt
 import binascii
+import time
 
 
 class MyWindow(QtGui.QWidget):
@@ -177,6 +178,8 @@ class MyWindow(QtGui.QWidget):
             te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
             if te:
                 os.system(selected_name+".rdp")
+                time.sleep(3)
+                os.remove(selected_name+".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -301,8 +304,13 @@ class ItemEditDialog(QtGui.QDialog):
         domain = str(self.ui.lineEditDomain.text())
         user = str(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
-        pwdHash = win32crypt.CryptProtectData(unicode(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
-        password = binascii.hexlify(pwdHash)
+        password = unicode(self.ui.lineEditPassword.text())
+
+        if password != u'':
+            pwdHash = win32crypt.CryptProtectData(password, u'psw', None, None, None, 0)
+            password = binascii.hexlify(pwdHash)
+        else:
+            password = u''
 
         self.ds.update_profile(self.storage_name, self.item_to_edit,  name, server, domain,  port, user, password)
         self.close()
@@ -320,7 +328,7 @@ class NewFolderDialog(QtGui.QDialog):
         self.ui.setupUi(self)
         self.ui.pushButtonOk.clicked.connect(self.ok)
         self.ui.pushButtonCancel.clicked.connect(self.cancel)
-        self.ui.labelParentName.setText("/"+str(self.parent))
+        self.ui.labelParentName.setText("Enter folder name")
 
     def ok(self):
         name = str(self.ui.lineEditFolderName.text())

@@ -61,8 +61,12 @@ class DataStorage():
                        "','DOMAIN'='" + domain +
                        "','PORT'='" + port +
                        "','USER'='" + user +
-                       "','PASSWORD'='" + password +
                        "' WHERE ID =" + str(idd))
+
+        if password != u'':
+            source.execute("UPDATE `PROFILES` SET "
+                           " 'PASSWORD'='" + password +
+                           "' WHERE ID =" + str(idd))
 
     def create_new_profile_folder(self, database, parent, name, idd):
         source = self.data_bases.get(database)
