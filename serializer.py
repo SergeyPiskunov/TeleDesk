@@ -23,9 +23,7 @@ class Serializer:
 
         #password
         if connection_params["PASSWORD"] != u'':
-            pwdHash = win32crypt.CryptProtectData(connection_params["PASSWORD"], u'psw', None, None, None, 0)
-            pwd = binascii.hexlify(pwdHash)
-            prepared_params.append("password 51:b:"+pwd)
+            prepared_params.append("password 51:b:"+connection_params["PASSWORD"])
 
         #domain
         if connection_params["DOMAIN"] != u'':

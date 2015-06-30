@@ -40,32 +40,37 @@ class DataStorage():
         source = self.data_bases.get(database)
         return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
 
-    def create_new_profile(self, database, name, server, port, user):
+    def create_new_profile(self, database, name, server, domain, port, user, password):
         source = self.data_bases.get(database)
         source.execute(
-            "INSERT INTO `PROFILES`(`Name`,`Alias`,`Server`,`Port`,`User`) VALUES (\""
+            "INSERT INTO `PROFILES`(`Name`,`Alias`,`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
             + name + "\",\""
             + name + "\",\""
+            + "1" + "\",\""
             + server + "\",\""
+            + domain + "\",\""
             + port + "\",\""
-            + user + "\")")
+            + user + "\",\""
+            + password + "\")")
 
-    def update_profile(self, database, id, name, server, port, user):
+    def update_profile(self, database, idd, name, server, domain, port, user, password):
         source = self.data_bases.get(database)
         source.execute("UPDATE `PROFILES` SET "
                        "  'Alias'='" + name +
                        "','SERVER'='" + server +
+                       "','DOMAIN'='" + domain +
                        "','PORT'='" + port +
                        "','USER'='" + user +
-                       "' WHERE ID =" + str(id))
+                       "','PASSWORD'='" + password +
+                       "' WHERE ID =" + str(idd))
 
-    def create_new_profile_folder(self, database, parent, name, id):
+    def create_new_profile_folder(self, database, parent, name, idd):
         source = self.data_bases.get(database)
         source.execute(
             "INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
             + parent + ",\""
             + name + "\","
-            + id + ")")
+            + idd + ")")
 
     def create_new_folder(self, database, parent, name):
         source = self.data_bases.get(database)
@@ -82,6 +87,7 @@ class DataStorage():
 
         #deleting all child profiles
         source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = \"" + idd + "\")")
+
         #deleting all child folders
         source.execute("DELETE FROM FOLDERS WHERE PARENT = \"" + idd + "\"")
 
@@ -90,6 +96,10 @@ class DataStorage():
 
         #deleting profile
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+
+    def update_item_rating(self, database, idd):
+        source = self.data_bases.get(database)
+        source.execute("UPDATE PROFILES SET RATING = RATING + 1 WHERE PROFILES.ID IN (SELECT PROFILE FROM FOLDERS WHERE FOLDERS.ID = "+idd+")")
 
 
 if __name__ == "__main__":

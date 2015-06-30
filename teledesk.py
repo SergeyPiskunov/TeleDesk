@@ -6,17 +6,28 @@ import new_folder_dialog
 import os
 from data_storage import DataStorage
 from serializer import Serializer
+import win32crypt
+import binascii
 
 
 class MyWindow(QtGui.QWidget):
+
+    #datastorage root element id
+    ROOT_ELEMENT_ID = "1"
+
     """ UI class"""
     def __init__(self, parent=None):
 
         super(MyWindow, self).__init__()
         #list of data sources
-        so = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
-        so2 = {"Name": "Common_storage", "Type": "common", "Path": "config2.db"}
-        self.sources = [so, so2]
+        self.sources = []
+        source1 = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
+        source2 = {"Name": "Common_storage", "Type": "common", "Path": "config2.db"}
+
+        self.sources.append(source1)
+        self.sources.append(source2)
+
+
         self.ds = DataStorage(self.sources)
 
         # GUI
@@ -24,7 +35,7 @@ class MyWindow(QtGui.QWidget):
         self.ui = main_window.Ui_MainWindow()
         self.ui.setupUi(self)
 
-
+        #tree view
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
         self.ui.treeView.setModel(model)
@@ -33,7 +44,7 @@ class MyWindow(QtGui.QWidget):
 
         for stor in self.sources:
             root = QtGui.QStandardItem(stor["Name"])
-            self.fill_tree(stor["Name"],"1", root)
+            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
 
@@ -69,7 +80,7 @@ class MyWindow(QtGui.QWidget):
             return True
         else: 
             return super(MyWindow, self).event(event)
-
+    """
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
@@ -81,14 +92,16 @@ class MyWindow(QtGui.QWidget):
             self.tray_icon.show()
             self.hide()
             event.ignore()
-
+    """
     def keyPressEvent(self, event):
+
         #DEL key
         if event.key() == 16777223:
             self.remove_item()
-        #elif event.key() == 16777222:
-        #    self.remove_item()
 
+        #INS key
+        elif event.key() == 16777222:
+            self.add_new_item()
 
     def restore_window(self, reason):
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
@@ -123,16 +136,20 @@ class MyWindow(QtGui.QWidget):
 
             self.fill_tree(storage, str(chld["ID"]), child_node)
 
+    def update_tree(self):
+
+        model = QtGui.QStandardItemModel()
+        model.setHorizontalHeaderLabels(['Name'])
+        self.ui.treeView.setModel(model)
+        for stor in self.sources:
+            root = QtGui.QStandardItem(stor["Name"])
+            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID , root)
+            model.appendRow(root)
+            self.ui.treeView.expand(model.indexFromItem(root))
+
     def display_item_info(self, index):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-
-        p = index.model().itemFromIndex(index).parent()
-        while p:
-            if not p.parent():
-                storage_name = str(p.text())
-            p = p.parent()
-
-
+        storage_name = self.get_storage_name(index)
 
         if selected_id:
             item = self.ds.get_profile_info(storage_name, selected_id)
@@ -151,23 +168,20 @@ class MyWindow(QtGui.QWidget):
 
     def init_connection(self, index):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-        item = self.ds.get_profile_info("Local_storage", selected_id)
+        selected_name = str(index.model().itemFromIndex(index).text())
+        storage_name = self.get_storage_name(index)
+
+        self.ds.update_item_rating(storage_name, selected_id)
+        item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", "test.rdp")
+            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
             if te:
-                os.system("test.rdp")
+                os.system(selected_name+".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-
-        p = index.model().itemFromIndex(index).parent()
-        while p:
-            if not p.parent():
-                storage_name = str(p.text())
-            p = p.parent()
-
-
+        storage_name = self.get_storage_name(index)
 
         item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
@@ -176,20 +190,12 @@ class MyWindow(QtGui.QWidget):
             input_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
             input_dialog.exec_()
             if input_dialog.updated:
-                model = QtGui.QStandardItemModel()
-                model.setHorizontalHeaderLabels(['Name'])
-                self.ui.treeView.setModel(model)
-                for stor in self.sources:
-                    root = QtGui.QStandardItem(stor["Name"])
-                    self.fill_tree(stor["Name"], "1", root)
-                    model.appendRow(root)
-                    self.ui.treeView.expand(model.indexFromItem(root))
+                self.update_tree()
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = str(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).parent().text())
-
         item = self.ds.get_folder_id(storage_name, selected_name)
 
         if item.__len__():
@@ -197,14 +203,7 @@ class MyWindow(QtGui.QWidget):
             input_dialog = ItemEditDialog(self.ds, item_data)
             input_dialog.exec_()
             if input_dialog.updated:
-                model = QtGui.QStandardItemModel()
-                model.setHorizontalHeaderLabels(['Name'])
-                self.ui.treeView.setModel(model)
-                for stor in self.sources:
-                    root = QtGui.QStandardItem(stor["Name"])
-                    self.fill_tree(stor["Name"], "1", root)
-                    model.appendRow(root)
-                    self.ui.treeView.expand(model.indexFromItem(root))
+                self.update_tree()
 
     def add_new_folder(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -217,46 +216,40 @@ class MyWindow(QtGui.QWidget):
             inputter = NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
-                model = QtGui.QStandardItemModel()
-                model.setHorizontalHeaderLabels(['Name'])
-                self.ui.treeView.setModel(model)
-                for stor in self.sources:
-                    root = QtGui.QStandardItem(stor["Name"])
-                    self.fill_tree(stor["Name"], "1", root)
-                    model.appendRow(root)
-                    self.ui.treeView.expand(model.indexFromItem(root))
+                self.update_tree()
 
     def remove_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-
-        p = index.model().itemFromIndex(index).parent()
-        while p:
-            if not p.parent():
-                storage_name = str(p.text())
-            p = p.parent()
-
-        if selected_id != "1":
-
+        storage_name = self.get_storage_name(index)
+        if selected_id != self.ROOT_ELEMENT_ID:
             #if there are child elements, asking user before deleting
             child_elements = self.ds.get_child_elements(storage_name, selected_id)
             if child_elements.__len__():
-                reply = QtGui.QMessageBox.question(self, 'Message', "Delete all child elements?",
+                reply = QtGui.QMessageBox.question(self, 'Message', "Delete element with all child elements?",
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                 QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
                     self.ds.delete_folder(storage_name, selected_id)
             else:
-                self.ds.delete_folder(storage_name, selected_id)
+                reply = QtGui.QMessageBox.question(self, 'Message', "Delete element?",
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.Yes:
+                    self.ds.delete_folder(storage_name, selected_id)
 
-            model = QtGui.QStandardItemModel()
-            model.setHorizontalHeaderLabels(['Name'])
-            self.ui.treeView.setModel(model)
-            for stor in self.sources:
-                root = QtGui.QStandardItem(stor["Name"])
-                self.fill_tree(stor["Name"], "1", root)
-                model.appendRow(root)
-                self.ui.treeView.expand(model.indexFromItem(root))
+            self.update_tree()
+
+    @staticmethod
+    def get_storage_name(index):
+
+        item = index.model().itemFromIndex(index)
+        storage_name = str(item.text())
+        while item:
+            if not item.parent():
+                storage_name = str(item.text())
+            item = item.parent()
+        return storage_name
 
 
 class ItemEditDialog(QtGui.QDialog):
@@ -275,7 +268,7 @@ class ItemEditDialog(QtGui.QDialog):
             self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
             self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
             self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
-            #self.ui.lineEditName.setText(item_data["PASSWORD"])
+            self.ui.lineEditDomain.setText(item_data["ItemData"]["DOMAIN"])
             self.ui.pushButtonSave.clicked.connect(self.edit_item)
         elif item_data["Mode"] == "AddItem":
             #self.ui.lineEditName.setText(item_data["Parent"])
@@ -286,9 +279,14 @@ class ItemEditDialog(QtGui.QDialog):
     def create_new_item(self):
         name = str(self.ui.lineEditName.text())
         server = str(self.ui.lineEditServer.text())
+        domain = str(self.ui.lineEditDomain.text())
         user = str(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
-        self.ds.create_new_profile(self.storage_name, name, server, port, user)
+
+        pwdHash = win32crypt.CryptProtectData(str(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
+        password = binascii.hexlify(pwdHash)
+
+        self.ds.create_new_profile(self.storage_name, name, server, domain, port, user, password)
 
         item = self.ds.get_profile_id(self.storage_name, name)
         if item.__len__():
@@ -300,9 +298,13 @@ class ItemEditDialog(QtGui.QDialog):
     def edit_item(self):
         name = str(self.ui.lineEditName.text())
         server = str(self.ui.lineEditServer.text())
+        domain = str(self.ui.lineEditDomain.text())
         user = str(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
-        self.ds.update_profile(self.storage_name, self.item_to_edit,  name, server, port, user)
+        pwdHash = win32crypt.CryptProtectData(unicode(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
+        password = binascii.hexlify(pwdHash)
+
+        self.ds.update_profile(self.storage_name, self.item_to_edit,  name, server, domain,  port, user, password)
         self.close()
 
 
@@ -337,5 +339,5 @@ if __name__ == "__main__":
     window.move(app.desktop().screen().rect().center() - window.rect().center())
     window.show()
     sys.exit(app.exec_())
-    #INSERT INTO `FOLDERS`(`ID`,`Parent`,`Name`,`Profile`) VALUES (14, 1, "new", 1);
+
 
