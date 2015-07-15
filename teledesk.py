@@ -66,16 +66,17 @@ class MyWindow(QtGui.QWidget):
         self.tray_icon = QtGui.QSystemTrayIcon()
         self.tray_icon.setIcon(QtGui.QIcon(icon))
         self.setWindowIcon(QtGui.QIcon(icon))
+
+
+
+
         # Restore the window when the tray icon is double clicked.
-        self.tray_icon.activated.connect(self.restore_window)
+        self.tray_icon.activated.connect(self.restore_window_from_tray)
+
     
     def event(self, event):    
         if (event.type() == QtCore.QEvent.WindowStateChange and 
                 self.isMinimized()):
-            # The window is already minimized at this point.  AFAIK,
-            # there is no hook stop a minimize event. Instead,
-            # removing the Qt.Tool flag should remove the window
-            # from the taskbar.
             self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.Tool)
             self.tray_icon.show()
             return True
@@ -104,17 +105,65 @@ class MyWindow(QtGui.QWidget):
         elif event.key() == 16777222:
             self.add_new_item()
 
-    def restore_window(self, reason):
+    def restore_window_from_menu(self):
+        self.tray_icon.hide()
+        self.showNormal()
+
+    def restore_window_from_tray(self, reason):
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
             self.tray_icon.hide()
-            # self.showNormal will restore the window even if it was
-            # minimized.
             self.showNormal()
+
         if reason == QtGui.QSystemTrayIcon.Trigger:
-            self.tray_icon.hide()
-            # self.showNormal will restore the window even if it was
-            # minimized.
-            self.showNormal()   
+            tray_menu = QtGui.QMenu(None)
+
+            self.tray_icon.setContextMenu(tray_menu)
+            self.tray_icon.setToolTip("TeleDesk")
+
+            #self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
+            #self.ui.exitAction = QtGui.QAction('&Exit', MyWindow)
+
+            #Title
+            self.ui.restore_win = QtGui.QAction("&TeleDesk", self)
+            tray_menu.addAction(self.ui.restore_win)
+            self.ui.restore_win.triggered.connect(self.restore_window_from_menu)
+
+            tray_menu.addSeparator()
+
+            folder_icon = QtGui.QIcon("res/folder.png")
+            computer_icon = QtGui.QIcon("res/computer.png")
+
+            for stor in self.sources:
+                top_list = self.ds.get_rated_items(stor["Name"], 32)
+                node_entry = tray_menu.addAction(stor["Name"])
+                node_entry.setIcon(folder_icon)
+                if top_list.__len__():
+                    for menu_item in top_list:
+                        entry = tray_menu.addAction(str(menu_item["NAME"]))
+                        entry.setIcon(computer_icon)
+                        self.connect(entry, QtCore.SIGNAL('triggered()'),
+                                     lambda menu_item = menu_item: self.prn( stor["Name"], str(menu_item["ID"]), str(menu_item["NAME"])))
+
+            tray_menu.addSeparator()
+
+            #Exit
+            self.ui.extact = QtGui.QAction("&Exit", self)
+            tray_menu.addAction(self.ui.extact)
+            self.ui.extact.triggered.connect(QtGui.qApp.quit)
+
+            self.tray_icon.contextMenu().popup(QtGui.QCursor.pos())
+
+
+
+    def prn(self, storage_name, selected_id, selected_name):
+        self.ds.update_item_rating(storage_name, selected_id)
+        item = self.ds.get_profile_info(storage_name, selected_id)
+        if item.__len__():
+            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
+            if te:
+                os.system(selected_name+".rdp")
+                time.sleep(3)
+                os.remove(selected_name+".rdp")
         
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
@@ -123,7 +172,7 @@ class MyWindow(QtGui.QWidget):
             child_node = QtGui.QStandardItem(str(chld["NAME"]))
             child_node.setData(QtCore.QVariant(str(chld["ID"])))
 
-            icon = QtGui.QIcon()
+            #icon = QtGui.QIcon()
             if str(chld["PROFILE"]) == u'':
                 icon = QtGui.QIcon("res/folder.png")
             elif str(chld["PROFILE"]):

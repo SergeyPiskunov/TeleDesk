@@ -105,6 +105,10 @@ class DataStorage():
         source = self.data_bases.get(database)
         source.execute("UPDATE PROFILES SET RATING = RATING + 1 WHERE PROFILES.ID IN (SELECT PROFILE FROM FOLDERS WHERE FOLDERS.ID = "+idd+")")
 
+    def get_rated_items(self, database, count="2"):
+        source = self.data_bases.get(database)
+        return source.get_data("SELECT PROFILES.NAME, FOLDERS.ID FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID ORDER BY RATING DESC LIMIT "+str(count)+ "")
+
 
 if __name__ == "__main__":
     pass
