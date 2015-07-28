@@ -226,7 +226,7 @@ class MyWindow(QtGui.QWidget):
         if item.__len__():
             te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
             if te:
-                os.system(selected_name+".rdp")
+                os.startfile(selected_name+".rdp")
                 time.sleep(3)
                 os.remove(selected_name+".rdp")
 
