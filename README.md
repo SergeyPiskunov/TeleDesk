@@ -21,6 +21,6 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 ###### To do:
 
 - database encryption
-- Google Drive support
+- database sharing via FTP
 - import/export to *.rdp
 - multilanguage UI
