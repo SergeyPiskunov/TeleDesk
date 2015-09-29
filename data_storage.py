@@ -5,11 +5,11 @@ class DataBase(db_connector.DBConnector):
     """ Keeps an instance of a database
     and it's name, path, type [local or shared]"""
 
-    def __init__(self, db_name, db_type, db_file):
-        db_connector.DBConnector.__init__(self, db_file)
-        self.name = db_name
-        self.type = db_type
-        self.path = db_file
+    def __init__(self, **kwargs):
+        db_connector.DBConnector.__init__(self, kwargs['Path'])
+        self.name = kwargs['Name']
+        self.type = kwargs['Type']
+        self.path = kwargs['Path']
 
 
 class DataStorage():
@@ -19,7 +19,7 @@ class DataStorage():
     def __init__(self, data_sources):
         self.data_bases = {}
         for db in data_sources:
-            database = DataBase(db["Name"], db["Type"], db["Path"])
+            database = DataBase(**db)
             self.data_bases[db["Name"]] = database
 
     def get_folders_children(self, database, parameters=None):
@@ -100,14 +100,6 @@ class DataStorage():
 
         #deleting profile
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
-
-    def update_item_rating(self, database, idd):
-        source = self.data_bases.get(database)
-        source.execute("UPDATE PROFILES SET RATING = RATING + 1 WHERE PROFILES.ID IN (SELECT PROFILE FROM FOLDERS WHERE FOLDERS.ID = "+idd+")")
-
-    def get_rated_items(self, database, count="2"):
-        source = self.data_bases.get(database)
-        return source.get_data("SELECT PROFILES.NAME, FOLDERS.ID FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID ORDER BY RATING DESC LIMIT "+str(count)+ "")
 
 
 if __name__ == "__main__":

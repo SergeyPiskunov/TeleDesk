@@ -9,25 +9,25 @@ from serializer import Serializer
 import win32crypt
 import binascii
 import time
+from user_settings import UserSettings
 
 
 class MyWindow(QtGui.QWidget):
-
-    #datastorage root element id
+    # datastorage root element id
     ROOT_ELEMENT_ID = "1"
 
     """ UI class"""
+
     def __init__(self, parent=None):
 
         super(MyWindow, self).__init__()
-        #list of data sources
+        #loading user settings
+        self.user_settings = UserSettings()
+        self.user_settings.load_config()
+        self.user_settings.dbs
         self.sources = []
-        source1 = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
-        source2 = {"Name": "Common_storage", "Type": "common", "Path": "config2.db"}
-
-        self.sources.append(source1)
-        self.sources.append(source2)
-
+        for db in self.user_settings.dbs.values():
+            self.sources.append(db)
 
         self.ds = DataStorage(self.sources)
 
@@ -49,8 +49,7 @@ class MyWindow(QtGui.QWidget):
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
 
-
-        self.ui.treeView.doubleClicked.connect(self.init_connection)
+        self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
         self.ui.deleteGroupAction.triggered.connect(self.remove_item)
         self.ui.editServerAction.triggered.connect(self.edit_item)
@@ -58,7 +57,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.addServerAction.triggered.connect(self.add_new_item)
         self.ui.removeServerAction.triggered.connect(self.remove_item)
 
-        
+
         #Minimizing to tray
         style = self.style()
         # Set the window and tray icon to something
@@ -73,15 +72,16 @@ class MyWindow(QtGui.QWidget):
         # Restore the window when the tray icon is double clicked.
         self.tray_icon.activated.connect(self.restore_window_from_tray)
 
-    
-    def event(self, event):    
-        if (event.type() == QtCore.QEvent.WindowStateChange and 
+
+    def event(self, event):
+        if (event.type() == QtCore.QEvent.WindowStateChange and
                 self.isMinimized()):
             self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.Tool)
             self.tray_icon.show()
             return True
-        else: 
+        else:
             return super(MyWindow, self).event(event)
+
     """
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
@@ -95,6 +95,7 @@ class MyWindow(QtGui.QWidget):
             self.hide()
             event.ignore()
     """
+
     def keyPressEvent(self, event):
 
         #DEL key
@@ -133,16 +134,22 @@ class MyWindow(QtGui.QWidget):
             folder_icon = QtGui.QIcon("res/folder.png")
             computer_icon = QtGui.QIcon("res/computer.png")
 
+
+
             for stor in self.sources:
-                top_list = self.ds.get_rated_items(stor["Name"], 32)
+                top_list = self.user_settings.get_rated_items(stor["Name"], 32)
                 node_entry = tray_menu.addAction(stor["Name"])
                 node_entry.setIcon(folder_icon)
                 if top_list.__len__():
                     for menu_item in top_list:
-                        entry = tray_menu.addAction(str(menu_item["NAME"]))
-                        entry.setIcon(computer_icon)
-                        self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                     lambda menu_item = menu_item: self.prn( stor["Name"], str(menu_item["ID"]), str(menu_item["NAME"])))
+                        item = self.ds.get_profile_info(stor["Name"], menu_item[0])
+                        if item.__len__():
+                            entry = tray_menu.addAction(item[0]["ALIAS"])
+                            entry.setIcon(computer_icon)
+                            self.connect(entry, QtCore.SIGNAL('triggered()'),
+                                         lambda menu_it=(stor["Name"],  menu_item[0]): self.init_connection_frommenu(menu_it))
+
+                            #self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
 
             tray_menu.addSeparator()
 
@@ -153,18 +160,6 @@ class MyWindow(QtGui.QWidget):
 
             self.tray_icon.contextMenu().popup(QtGui.QCursor.pos())
 
-
-
-    def prn(self, storage_name, selected_id, selected_name):
-        self.ds.update_item_rating(storage_name, selected_id)
-        item = self.ds.get_profile_info(storage_name, selected_id)
-        if item.__len__():
-            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
-            if te:
-                os.system(selected_name+".rdp")
-                time.sleep(3)
-                os.remove(selected_name+".rdp")
-        
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
 
@@ -193,7 +188,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.setModel(model)
         for stor in self.sources:
             root = QtGui.QStandardItem(stor["Name"])
-            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID , root)
+            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
 
@@ -216,19 +211,25 @@ class MyWindow(QtGui.QWidget):
             else:
                 self.ui.textEditDescription.setText("")
 
-    def init_connection(self, index):
+    def init_connection_fromwindow(self, index):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-        selected_name = str(index.model().itemFromIndex(index).text())
         storage_name = self.get_storage_name(index)
+        self.init_connection(storage_name, selected_id)
 
-        self.ds.update_item_rating(storage_name, selected_id)
+    def init_connection_frommenu(self, selected_item):
+        storage_name = selected_item[0]
+        selected_id = selected_item[1]
+        self.init_connection(storage_name, selected_id)
+
+    def init_connection(self, storage_name, selected_id):
+        self.user_settings.update_item_rating(storage_name, selected_id)
         item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", selected_name+".rdp")
+            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", item[0]["ALIAS"] + ".rdp")
             if te:
-                os.startfile(selected_name+".rdp")
+                os.startfile(item[0]["ALIAS"] + ".rdp")
                 time.sleep(3)
-                os.remove(selected_name+".rdp")
+                os.remove(item[0]["ALIAS"] + ".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -279,14 +280,14 @@ class MyWindow(QtGui.QWidget):
             child_elements = self.ds.get_child_elements(storage_name, selected_id)
             if child_elements.__len__():
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element with all child elements?",
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                QtGui.QMessageBox.No)
+                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                   QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
                     self.ds.delete_folder(storage_name, selected_id)
             else:
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element?",
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                QtGui.QMessageBox.No)
+                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                   QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
                     self.ds.delete_folder(storage_name, selected_id)
 
@@ -305,7 +306,6 @@ class MyWindow(QtGui.QWidget):
 
 
 class ItemEditDialog(QtGui.QDialog):
-
     def __init__(self, ds, item_data=None):
         self.ds = ds
         self.storage_name = item_data["Storage"]
@@ -323,7 +323,7 @@ class ItemEditDialog(QtGui.QDialog):
             self.ui.lineEditDomain.setText(item_data["ItemData"]["DOMAIN"])
             self.ui.pushButtonSave.clicked.connect(self.edit_item)
         elif item_data["Mode"] == "AddItem":
-            #self.ui.lineEditName.setText(item_data["Parent"])
+            # self.ui.lineEditName.setText(item_data["Parent"])
             self.ui.pushButtonSave.clicked.connect(self.create_new_item)
         else:
             pass
@@ -361,12 +361,11 @@ class ItemEditDialog(QtGui.QDialog):
         else:
             password = u''
 
-        self.ds.update_profile(self.storage_name, self.item_to_edit,  name, server, domain,  port, user, password)
+        self.ds.update_profile(self.storage_name, self.item_to_edit, name, server, domain, port, user, password)
         self.close()
 
 
 class NewFolderDialog(QtGui.QDialog):
-
     def __init__(self, ds, item_data=None):
         self.updated = False
         self.ds = ds
@@ -391,6 +390,7 @@ class NewFolderDialog(QtGui.QDialog):
 
 if __name__ == "__main__":
     import sys
+
     app = QtGui.QApplication(sys.argv)
     window = MyWindow()
     window.move(app.desktop().screen().rect().center() - window.rect().center())
