@@ -21,7 +21,7 @@ class MyWindow(QtGui.QWidget):
     def __init__(self, parent=None):
 
         super(MyWindow, self).__init__()
-        #loading user settings
+        # loading user settings
         self.user_settings = UserSettings()
         self.user_settings.load_config()
         self.user_settings.dbs
@@ -36,7 +36,7 @@ class MyWindow(QtGui.QWidget):
         self.ui = main_window.Ui_MainWindow()
         self.ui.setupUi(self)
 
-        #tree view
+        # tree view
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
         self.ui.treeView.setModel(model)
@@ -98,11 +98,11 @@ class MyWindow(QtGui.QWidget):
 
     def keyPressEvent(self, event):
 
-        #DEL key
+        # DEL key
         if event.key() == 16777223:
             self.remove_item()
 
-        #INS key
+        # INS key
         elif event.key() == 16777222:
             self.add_new_item()
 
@@ -121,8 +121,8 @@ class MyWindow(QtGui.QWidget):
             self.tray_icon.setContextMenu(tray_menu)
             self.tray_icon.setToolTip("TeleDesk")
 
-            #self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
-            #self.ui.exitAction = QtGui.QAction('&Exit', MyWindow)
+            # self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
+            # self.ui.exitAction = QtGui.QAction('&Exit', MyWindow)
 
             #Title
             self.ui.restore_win = QtGui.QAction("&TeleDesk", self)
@@ -134,8 +134,6 @@ class MyWindow(QtGui.QWidget):
             folder_icon = QtGui.QIcon("res/folder.png")
             computer_icon = QtGui.QIcon("res/computer.png")
 
-
-
             for stor in self.sources:
                 top_list = self.user_settings.get_rated_items(stor["Name"], 32)
                 node_entry = tray_menu.addAction(stor["Name"])
@@ -144,10 +142,11 @@ class MyWindow(QtGui.QWidget):
                     for menu_item in top_list:
                         item = self.ds.get_profile_info(stor["Name"], menu_item[0])
                         if item.__len__():
-                            entry = tray_menu.addAction(item[0]["ALIAS"])
+                            entry = tray_menu.addAction(item[0]["NAME"])
                             entry.setIcon(computer_icon)
                             self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                         lambda menu_it=(stor["Name"],  menu_item[0]): self.init_connection_frommenu(menu_it))
+                                         lambda menu_it=(stor["Name"], menu_item[0]): self.init_connection_frommenu(
+                                             menu_it))
 
                             #self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
 
@@ -164,10 +163,10 @@ class MyWindow(QtGui.QWidget):
         cildlist = self.ds.get_folders_children(storage, parent)
 
         for chld in cildlist:
-            child_node = QtGui.QStandardItem(str(chld["NAME"]))
-            child_node.setData(QtCore.QVariant(str(chld["ID"])))
+            child_node = QtGui.QStandardItem(unicode(chld["NAME"]))
+            child_node.setData(QtCore.QVariant(unicode(chld["ID"])))
 
-            #icon = QtGui.QIcon()
+            # icon = QtGui.QIcon()
             if str(chld["PROFILE"]) == u'':
                 icon = QtGui.QIcon("res/folder.png")
             elif str(chld["PROFILE"]):
@@ -179,7 +178,7 @@ class MyWindow(QtGui.QWidget):
             root.appendRow(child_node)
             self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
 
-            self.fill_tree(storage, str(chld["ID"]), child_node)
+            self.fill_tree(storage, unicode(chld["ID"]), child_node)
 
     def update_tree(self):
 
@@ -200,11 +199,11 @@ class MyWindow(QtGui.QWidget):
             item = self.ds.get_profile_info(storage_name, selected_id)
 
             if item.__len__():
-                alias = str(item[0]["ALIAS"])
-                server = str(item[0]["SERVER"])
+                name = unicode(item[0]["NAME"])
+                server = unicode(item[0]["SERVER"])
                 port = str(item[0]["PORT"])
-                user = str(item[0]["USER"])
-                self.ui.textEditDescription.setText("Name - " + alias + "\n"
+                user = unicode(item[0]["USER"])
+                self.ui.textEditDescription.setText("Name - " + name + "\n"
                                                     + "Server - " + server + "\n"
                                                     + "Port - " + port + "\n"
                                                     + "User - " + user + "\n")
@@ -225,11 +224,11 @@ class MyWindow(QtGui.QWidget):
         self.user_settings.update_item_rating(storage_name, selected_id)
         item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", item[0]["ALIAS"] + ".rdp")
+            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", item[0]["NAME"] + ".rdp")
             if te:
-                os.startfile(item[0]["ALIAS"] + ".rdp")
+                os.startfile(item[0]["NAME"] + ".rdp")
                 time.sleep(3)
-                os.remove(item[0]["ALIAS"] + ".rdp")
+                os.remove(item[0]["NAME"] + ".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -247,7 +246,7 @@ class MyWindow(QtGui.QWidget):
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
-        selected_name = str(index.model().itemFromIndex(index).text())
+        selected_name = unicode(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).parent().text())
         item = self.ds.get_folder_id(storage_name, selected_name)
 
@@ -276,7 +275,7 @@ class MyWindow(QtGui.QWidget):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
         if selected_id != self.ROOT_ELEMENT_ID:
-            #if there are child elements, asking user before deleting
+            # if there are child elements, asking user before deleting
             child_elements = self.ds.get_child_elements(storage_name, selected_id)
             if child_elements.__len__():
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element with all child elements?",
@@ -297,10 +296,10 @@ class MyWindow(QtGui.QWidget):
     def get_storage_name(index):
 
         item = index.model().itemFromIndex(index)
-        storage_name = str(item.text())
+        storage_name = unicode(item.text())
         while item:
             if not item.parent():
-                storage_name = str(item.text())
+                storage_name = unicode(item.text())
             item = item.parent()
         return storage_name
 
@@ -316,7 +315,7 @@ class ItemEditDialog(QtGui.QDialog):
         self.ui.setupUi(self)
         if item_data["Mode"] == "Edit":
             self.item_to_edit = item_data["ItemData"]["ID"]
-            self.ui.lineEditName.setText(item_data["ItemData"]["ALIAS"])
+            self.ui.lineEditName.setText(item_data["ItemData"]["NAME"])
             self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
             self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
             self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
@@ -329,29 +328,29 @@ class ItemEditDialog(QtGui.QDialog):
             pass
 
     def create_new_item(self):
-        name = str(self.ui.lineEditName.text())
-        server = str(self.ui.lineEditServer.text())
-        domain = str(self.ui.lineEditDomain.text())
-        user = str(self.ui.lineEditUser.text())
+        name = unicode(self.ui.lineEditName.text())
+        server = unicode(self.ui.lineEditServer.text())
+        domain = unicode(self.ui.lineEditDomain.text())
+        user = unicode(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
 
         pwdHash = win32crypt.CryptProtectData(str(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
         password = binascii.hexlify(pwdHash)
 
-        self.ds.create_new_profile(self.storage_name, name, server, domain, port, user, password)
+        self.ds.create_new_profile(self.storage_name, self.parent, name, server, domain, port, user, password)
 
-        item = self.ds.get_profile_id(self.storage_name, name)
-        if item.__len__():
-            id = str(item[0]["ID"])
-            self.ds.create_new_profile_folder(self.storage_name, self.parent, name, id)
-            self.updated = True
-            self.close()
+        # item = self.ds.get_profile_id(self.storage_name, name)
+        # if item.__len__():
+        #    id = str(item[0]["ID"])
+        #    self.ds.create_new_profile_folder(self.storage_name, self.parent, name, id)
+        self.updated = True
+        self.close()
 
     def edit_item(self):
-        name = str(self.ui.lineEditName.text())
-        server = str(self.ui.lineEditServer.text())
-        domain = str(self.ui.lineEditDomain.text())
-        user = str(self.ui.lineEditUser.text())
+        name = unicode(self.ui.lineEditName.text())
+        server = unicode(self.ui.lineEditServer.text())
+        domain = unicode(self.ui.lineEditDomain.text())
+        user = unicode(self.ui.lineEditUser.text())
         port = str(self.ui.lineEditPort.text())
         password = unicode(self.ui.lineEditPassword.text())
 
@@ -379,7 +378,7 @@ class NewFolderDialog(QtGui.QDialog):
         self.ui.labelParentName.setText("Enter folder name")
 
     def ok(self):
-        name = str(self.ui.lineEditFolderName.text())
+        name = unicode(self.ui.lineEditFolderName.text())
         self.ds.create_new_folder(self.storage, self.parent, name)
         self.updated = True
         self.close()
@@ -393,7 +392,9 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
     window = MyWindow()
-    window.move(app.desktop().screen().rect().center() - window.rect().center())
+    window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
+                              app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
+
     window.show()
     sys.exit(app.exec_())
 

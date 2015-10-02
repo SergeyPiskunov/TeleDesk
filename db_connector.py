@@ -19,7 +19,7 @@ class DBConnector:
                 cursor.execute(query)
             return cursor.fetchall()
 
-    def execute(self, query, parameters=None):
+    def execute(self, query, parameters=None, return_lastrow=None):
         with self.db:
             cursor = self.db.cursor()
             if parameters:
@@ -27,6 +27,9 @@ class DBConnector:
             else:
                 cursor.execute(query)
             self.db.commit()
+
+            if return_lastrow:
+                return cursor.lastrowid
 
 if __name__ == "__main__":
         dbc = DBConnector("config.db")

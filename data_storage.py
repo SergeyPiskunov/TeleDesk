@@ -38,30 +38,38 @@ class DataStorage():
 
     def get_profile_id(self, database, parameters=None):
         source = self.data_bases.get(database)
-        return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
+        #return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
+        return source.get_data("SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1", parameters)
 
-    def create_new_profile(self, database, name, server, domain, port, user, password):
+    def create_new_profile(self, database, parent, name, server, domain, port, user, password):
         source = self.data_bases.get(database)
-        source.execute(
-            "INSERT INTO `PROFILES`(`Name`,`Alias`,`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
-            + name + "\",\""
-            + name + "\",\""
+        lastrow = source.execute(
+            "INSERT INTO `PROFILES`(`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
             + "1" + "\",\""
             + server + "\",\""
             + domain + "\",\""
             + port + "\",\""
             + user + "\",\""
-            + password + "\")")
+            + password + "\")", None, True)
+
+        source.execute(
+            "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
+            + parent + "\",\""
+            + name + "\",\""
+            + str(lastrow) + "\")")
 
     def update_profile(self, database, idd, name, server, domain, port, user, password):
         source = self.data_bases.get(database)
         source.execute("UPDATE `PROFILES` SET "
-                       "  'Alias'='" + name +
-                       "','SERVER'='" + server +
+                       "  'SERVER'='" + server +
                        "','DOMAIN'='" + domain +
                        "','PORT'='" + port +
                        "','USER'='" + user +
                        "' WHERE ID =" + str(idd))
+
+        source.execute("UPDATE `FOLDERS` SET "
+                       " 'NAME'='" + name +
+                       "' WHERE PROFILE =" + str(idd))
 
         if password != u'':
             source.execute("UPDATE `PROFILES` SET "

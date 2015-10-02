@@ -57,15 +57,12 @@ class UserSettings(object):
 
     def get_rated_items(self, storage_name, items=5):
         toplist = sorted(self.topten[storage_name].items(), key=lambda x: x[1], reverse=True)
-        #print storage_name, toplist, self.topten
         result = []
         if items > len(toplist):
             items = len(toplist)
 
         for i in range(items):
             result.append(toplist[i][0])
-
-        #print storage_name, result
         return toplist
 
 

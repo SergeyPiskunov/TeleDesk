@@ -20,8 +20,8 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MyWin):
         MyWin.setObjectName(_fromUtf8("MyWin"))
-        MyWin.resize(443, 379)
-        MyWin.setContentsMargins(-10, -10, -15, -25)
+        MyWin.resize(243, 579)
+        MyWin.setContentsMargins(-10, -10, -10, -25)
         #MyWin.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
 
         self.verticalLayout = QtGui.QVBoxLayout(MyWin)
@@ -81,7 +81,7 @@ class Ui_MainWindow(object):
         self.treeView.setContextMenuPolicy(3)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.treeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.gridLayout.addWidget(self.treeView, 2, 0, 1, 3)
+        self.gridLayout.addWidget(self.treeView, 2, 0, 1, 4)
 
         #self.horSpacer = QtGui.QSpacerItem(10, 10, vPolicy=QtGui.QSizePolicy.Expanding)
         #self.horSpacer.
@@ -91,7 +91,8 @@ class Ui_MainWindow(object):
 
         self.textEditDescription = QtGui.QTextEdit(MyWin)
         self.textEditDescription.setObjectName(_fromUtf8("textEditDescription"))
-        self.gridLayout.addWidget(self.textEditDescription, 2, 3, 1, 1)
+        self.gridLayout.addWidget(self.textEditDescription, 3, 0, 3, 4)
+
         self.labelStatus = QtGui.QLabel(MyWin)
         self.labelStatus.setText(_fromUtf8(""))
         self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
