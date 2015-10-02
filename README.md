@@ -16,11 +16,11 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 
 - core
 - main window UI
+- quicklaunch window UI
 
 ###### To do:
 
 - database encryption
-- quicklaunch window UI
-- Google Drive support
+- database sharing via FTP
 - import/export to *.rdp
 - multilanguage UI
