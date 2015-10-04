@@ -41,55 +41,6 @@ class DataStorage():
         #return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
         return source.get_data("SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1", parameters)
 
-    def create_new_profile(self, database, parent, name, server, domain, port, user, password):
-        source = self.data_bases.get(database)
-        lastrow = source.execute(
-            "INSERT INTO `PROFILES`(`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
-            + "1" + "\",\""
-            + server + "\",\""
-            + domain + "\",\""
-            + port + "\",\""
-            + user + "\",\""
-            + password + "\")", None, True)
-
-        source.execute(
-            "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
-            + parent + "\",\""
-            + name + "\",\""
-            + str(lastrow) + "\")")
-
-    def update_profile(self, database, idd, name, server, domain, port, user, password):
-        source = self.data_bases.get(database)
-        source.execute("UPDATE `PROFILES` SET "
-                       "  'SERVER'='" + server +
-                       "','DOMAIN'='" + domain +
-                       "','PORT'='" + port +
-                       "','USER'='" + user +
-                       "' WHERE ID =" + str(idd))
-
-        source.execute("UPDATE `FOLDERS` SET "
-                       " 'NAME'='" + name +
-                       "' WHERE PROFILE =" + str(idd))
-
-        if password != u'':
-            source.execute("UPDATE `PROFILES` SET "
-                           " 'PASSWORD'='" + password +
-                           "' WHERE ID =" + str(idd))
-
-    def create_new_profile_folder(self, database, parent, name, idd):
-        source = self.data_bases.get(database)
-        source.execute(
-            "INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
-            + parent + ",\""
-            + name + "\","
-            + idd + ")")
-
-    def create_new_folder(self, database, parent, name):
-        source = self.data_bases.get(database)
-        source.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
-                       + parent + ",\""
-                       + name + "\" , '')")
-
     def get_child_elements(self, database, idd):
         source = self.data_bases.get(database)
         return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)", idd)
@@ -108,6 +59,49 @@ class DataStorage():
 
         #deleting profile
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+
+    def create_new_folder(self, database, parent, name):
+        source = self.data_bases.get(database)
+        source.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
+                       + parent + ",\""
+                       + name + "\" , '')")
+
+    def create_new_profile(self, **kwargs):
+        source = self.data_bases.get(kwargs['storage_name'])
+        lastrow = source.execute(
+            "INSERT INTO `PROFILES`(`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
+            + "1" + "\",\""
+            + kwargs['server'] + "\",\""
+            + kwargs['domain'] + "\",\""
+            + kwargs['port'] + "\",\""
+            + kwargs['user'] + "\",\""
+            + kwargs['password'] + "\")", None, True)
+
+        source.execute(
+            "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
+            + kwargs['parent'] + "\",\""
+            + kwargs['name'] + "\",\""
+            + str(lastrow) + "\")")
+
+    def update_profile(self, **kwargs):
+
+        source = self.data_bases.get(kwargs['storage_name'])
+        source.execute("UPDATE `PROFILES` SET "
+                       "  'SERVER'='" + kwargs['server'] +
+                       "','DOMAIN'='" + kwargs['domain'] +
+                       "','PORT'='" + kwargs['port'] +
+                       "','USER'='" + kwargs['user'] +
+                       "' WHERE ID =" + str(kwargs['item_to_edit']))
+
+        source.execute("UPDATE `FOLDERS` SET "
+                       " 'NAME'='" + kwargs['name'] +
+                       "' WHERE PROFILE =" + str(kwargs['item_to_edit']))
+
+        if kwargs['password'] != u'':
+            source.execute("UPDATE `PROFILES` SET "
+                           " 'PASSWORD'='" + kwargs['password'] +
+                           "' WHERE ID =" + str(kwargs['item_to_edit']))
+
 
 
 if __name__ == "__main__":

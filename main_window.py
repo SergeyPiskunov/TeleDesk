@@ -22,7 +22,9 @@ class Ui_MainWindow(object):
         MyWin.setObjectName(_fromUtf8("MyWin"))
         MyWin.resize(243, 579)
         MyWin.setContentsMargins(-10, -10, -10, -25)
-        #MyWin.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+
+        MyWin.setMinimumSize(243, 579)
+        MyWin.setMaximumSize(243, 800)
 
         self.verticalLayout = QtGui.QVBoxLayout(MyWin)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -76,27 +78,18 @@ class Ui_MainWindow(object):
         fileMenu.addAction(importRdpAction)
         fileMenu.addAction(self.exitAction)
 
-
+        #tree view
         self.treeView = QtGui.QTreeView(MyWin)
         self.treeView.setContextMenuPolicy(3)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.treeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.treeView.customContextMenuRequested.connect(self.openMenu)
         self.gridLayout.addWidget(self.treeView, 2, 0, 1, 4)
 
-        #self.horSpacer = QtGui.QSpacerItem(10, 10, vPolicy=QtGui.QSizePolicy.Expanding)
-        #self.horSpacer.
-        #self.gridLayout.addWidget(self.horSpacer, 2, 0, 1, 3)
-
-        self.treeView.customContextMenuRequested.connect(self.openMenu)
-
-        self.textEditDescription = QtGui.QTextEdit(MyWin)
-        self.textEditDescription.setObjectName(_fromUtf8("textEditDescription"))
-        self.gridLayout.addWidget(self.textEditDescription, 3, 0, 3, 4)
-
+        #status label
         self.labelStatus = QtGui.QLabel(MyWin)
-        self.labelStatus.setText(_fromUtf8(""))
         self.labelStatus.setObjectName(_fromUtf8("labelStatus"))
-        #self.gridLayout.addWidget(self.labelStatus, 3, 0, 1, 4)
+        self.gridLayout.addWidget(self.labelStatus, 4, 0, 4, 3)
         self.verticalLayout.addLayout(self.gridLayout)
 
         self.retranslateUi(MyWin)

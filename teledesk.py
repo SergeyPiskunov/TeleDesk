@@ -2,6 +2,7 @@
 from PyQt4 import QtGui, QtCore
 import main_window
 import item_edit_dialog
+import user_settings_dialog
 import new_folder_dialog
 import os
 from data_storage import DataStorage
@@ -56,9 +57,9 @@ class MyWindow(QtGui.QWidget):
         self.ui.addGroupAction.triggered.connect(self.add_new_folder)
         self.ui.addServerAction.triggered.connect(self.add_new_item)
         self.ui.removeServerAction.triggered.connect(self.remove_item)
+        self.ui.settingsAction.triggered.connect(self.show_user_settings)
 
-
-        #Minimizing to tray
+        # Minimizing to tray
         style = self.style()
         # Set the window and tray icon to something
         icon = style.standardIcon(QtGui.QStyle.SP_ComputerIcon)
@@ -66,12 +67,8 @@ class MyWindow(QtGui.QWidget):
         self.tray_icon.setIcon(QtGui.QIcon(icon))
         self.setWindowIcon(QtGui.QIcon(icon))
 
-
-
-
         # Restore the window when the tray icon is double clicked.
         self.tray_icon.activated.connect(self.restore_window_from_tray)
-
 
     def event(self, event):
         if (event.type() == QtCore.QEvent.WindowStateChange and
@@ -81,12 +78,9 @@ class MyWindow(QtGui.QWidget):
             return True
         else:
             return super(MyWindow, self).event(event)
-
-    """
-    def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-            QtGui.QMessageBox.No)
+                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                           QtGui.QMessageBox.No)
 
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
@@ -94,7 +88,6 @@ class MyWindow(QtGui.QWidget):
             self.tray_icon.show()
             self.hide()
             event.ignore()
-    """
 
     def keyPressEvent(self, event):
 
@@ -109,11 +102,15 @@ class MyWindow(QtGui.QWidget):
     def restore_window_from_menu(self):
         self.tray_icon.hide()
         self.showNormal()
+        self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
+                                app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
 
     def restore_window_from_tray(self, reason):
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
             self.tray_icon.hide()
             self.showNormal()
+            self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
+                                    app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
 
         if reason == QtGui.QSystemTrayIcon.Trigger:
             tray_menu = QtGui.QMenu(None)
@@ -124,7 +121,7 @@ class MyWindow(QtGui.QWidget):
             # self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
             # self.ui.exitAction = QtGui.QAction('&Exit', MyWindow)
 
-            #Title
+            # Title
             self.ui.restore_win = QtGui.QAction("&TeleDesk", self)
             tray_menu.addAction(self.ui.restore_win)
             self.ui.restore_win.triggered.connect(self.restore_window_from_menu)
@@ -192,6 +189,7 @@ class MyWindow(QtGui.QWidget):
             self.ui.treeView.expand(model.indexFromItem(root))
 
     def display_item_info(self, index):
+
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
 
@@ -203,12 +201,12 @@ class MyWindow(QtGui.QWidget):
                 server = unicode(item[0]["SERVER"])
                 port = str(item[0]["PORT"])
                 user = unicode(item[0]["USER"])
-                self.ui.textEditDescription.setText("Name - " + name + "\n"
-                                                    + "Server - " + server + "\n"
-                                                    + "Port - " + port + "\n"
-                                                    + "User - " + user + "\n")
+                self.ui.labelStatus.setText(" Name - " + name + "\n"
+                                                    + " Server - " + server + "\n"
+                                                    + " Port - " + port + "\n"
+                                                    + " User - " + user + "\n\n")
             else:
-                self.ui.textEditDescription.setText("")
+                self.ui.labelStatus.setText("")
 
     def init_connection_fromwindow(self, index):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
@@ -237,12 +235,28 @@ class MyWindow(QtGui.QWidget):
 
         item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            item_data = {"Storage": storage_name, "Parent": None, "ItemData": item[0], "Mode": "Edit"}
-            input_dialog = ItemEditDialog(self.ds, item_data)
+            input_dialog = ItemEditDialog(self.ds,
+                                          {"Storage": storage_name,
+                                           "Parent": None,
+                                           "ItemData": item[0],
+                                           "Mode": "Edit"})
             input_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
             input_dialog.exec_()
-            if input_dialog.updated:
-                self.update_tree()
+            self.update_tree()
+
+            item = self.ds.get_profile_info(storage_name, selected_id)
+
+            if item.__len__():
+                name = unicode(item[0]["NAME"])
+                server = unicode(item[0]["SERVER"])
+                port = str(item[0]["PORT"])
+                user = unicode(item[0]["USER"])
+                self.ui.labelStatus.setText(" Name - " + name + "\n"
+                                                    + " Server - " + server + "\n"
+                                                    + " Port - " + port + "\n"
+                                                    + " User - " + user + "\n\n")
+            else:
+                self.ui.labelStatus.setText("")
 
     def add_new_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -292,6 +306,11 @@ class MyWindow(QtGui.QWidget):
 
             self.update_tree()
 
+    def show_user_settings(self):
+        settings_dialog = UserSettingsDialog()
+        # settings_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
+        settings_dialog.exec_()
+
     @staticmethod
     def get_storage_name(index):
 
@@ -328,39 +347,42 @@ class ItemEditDialog(QtGui.QDialog):
             pass
 
     def create_new_item(self):
-        name = unicode(self.ui.lineEditName.text())
-        server = unicode(self.ui.lineEditServer.text())
-        domain = unicode(self.ui.lineEditDomain.text())
-        user = unicode(self.ui.lineEditUser.text())
-        port = str(self.ui.lineEditPort.text())
-
         pwdHash = win32crypt.CryptProtectData(str(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
         password = binascii.hexlify(pwdHash)
 
-        self.ds.create_new_profile(self.storage_name, self.parent, name, server, domain, port, user, password)
+        self.ds.create_new_profile(**{
+            'parent': self.parent,
+            'storage_name': self.storage_name,
+            'name': unicode(self.ui.lineEditName.text()),
+            'server': unicode(self.ui.lineEditServer.text()),
+            'domain': unicode(self.ui.lineEditDomain.text()),
+            'user': unicode(self.ui.lineEditUser.text()),
+            'password': password,
+            'port': str(self.ui.lineEditPort.text())})
 
-        # item = self.ds.get_profile_id(self.storage_name, name)
-        # if item.__len__():
-        #    id = str(item[0]["ID"])
-        #    self.ds.create_new_profile_folder(self.storage_name, self.parent, name, id)
         self.updated = True
         self.close()
 
     def edit_item(self):
-        name = unicode(self.ui.lineEditName.text())
-        server = unicode(self.ui.lineEditServer.text())
-        domain = unicode(self.ui.lineEditDomain.text())
-        user = unicode(self.ui.lineEditUser.text())
-        port = str(self.ui.lineEditPort.text())
-        password = unicode(self.ui.lineEditPassword.text())
+
+        password = self.ui.lineEditPassword.text()
 
         if password != u'':
-            pwdHash = win32crypt.CryptProtectData(password, u'psw', None, None, None, 0)
+            pwdHash = win32crypt.CryptProtectData(unicode(password), u'psw', None, None, None, 0)
             password = binascii.hexlify(pwdHash)
         else:
-            password = u''
+            password = ''
 
-        self.ds.update_profile(self.storage_name, self.item_to_edit, name, server, domain, port, user, password)
+        self.ds.update_profile(**{
+            'item_to_edit': self.item_to_edit,
+            'storage_name': self.storage_name,
+            'name': unicode(self.ui.lineEditName.text()),
+            'server': unicode(self.ui.lineEditServer.text()),
+            'domain': unicode(self.ui.lineEditDomain.text()),
+            'user': unicode(self.ui.lineEditUser.text()),
+            'password': password,
+            'port': str(self.ui.lineEditPort.text())})
+
         self.close()
 
 
@@ -387,6 +409,13 @@ class NewFolderDialog(QtGui.QDialog):
         self.close()
 
 
+class UserSettingsDialog(QtGui.QDialog):
+    def __init__(self):
+        QtGui.QWidget.__init__(self, None)
+        self.ui = user_settings_dialog.Ui_UserSettingsWin()
+        self.ui.setupUi(self)
+
+
 if __name__ == "__main__":
     import sys
 
@@ -394,8 +423,6 @@ if __name__ == "__main__":
     window = MyWindow()
     window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                               app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
-
+    #window.setSizePolicy(0, 0)
     window.show()
     sys.exit(app.exec_())
-
-
