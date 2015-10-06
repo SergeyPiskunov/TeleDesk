@@ -1,8 +1,8 @@
 # encoding: utf-8
-
 import os
 import time
-
+import win32crypt
+import binascii
 from PyQt4 import QtGui, QtCore
 
 from libs.db.datastorage import DataStorage
@@ -81,6 +81,8 @@ class MyWindow(QtGui.QWidget):
             return True
         else:
             return super(MyWindow, self).event(event)
+
+    def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                            QtGui.QMessageBox.No)
