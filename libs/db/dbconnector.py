@@ -2,7 +2,7 @@
 import sqlite3 as sqlite
 
 
-class DBConnector:
+class DBConnector(object):
     """ SQLite Database wrapper """
 
     def __init__(self, db_file):

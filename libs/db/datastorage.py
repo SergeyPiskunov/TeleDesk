@@ -1,12 +1,12 @@
-import db_connector
+from dbconnector import DBConnector
 
 
-class DataBase(db_connector.DBConnector):
+class DataBase(DBConnector):
     """ Keeps an instance of a database
     and it's name, path, type [local or shared]"""
 
     def __init__(self, **kwargs):
-        db_connector.DBConnector.__init__(self, kwargs['Path'])
+        DBConnector.__init__(self, kwargs['Path'])
         self.name = kwargs['Name']
         self.type = kwargs['Type']
         self.path = kwargs['Path']

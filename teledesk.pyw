@@ -1,16 +1,19 @@
 # encoding: utf-8
-from PyQt4 import QtGui, QtCore
-import main_window
-import item_edit_dialog
-import user_settings_dialog
-import new_folder_dialog
+
 import os
-from data_storage import DataStorage
-from serializer import Serializer
-import win32crypt
-import binascii
 import time
-from user_settings import UserSettings
+
+from PyQt4 import QtGui, QtCore
+
+from libs.db.datastorage import DataStorage
+
+from libs.forms.mainwindow import Ui_MainWindow
+from libs.forms.settings import Ui_UserSettingsWin
+from libs.forms.newfolder import Ui_NewFolderWin
+from libs.forms.itemedit import Ui_EditWin
+
+from libs.core.serializer import Serializer
+from libs.core.usersettings import UserSettings
 
 
 class MyWindow(QtGui.QWidget):
@@ -34,7 +37,7 @@ class MyWindow(QtGui.QWidget):
 
         # GUI
         QtGui.QWidget.__init__(self, parent)
-        self.ui = main_window.Ui_MainWindow()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
         # tree view
@@ -330,7 +333,7 @@ class ItemEditDialog(QtGui.QDialog):
         self.updated = False
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
-        self.ui = item_edit_dialog.Ui_EditWin()
+        self.ui = Ui_EditWin()
         self.ui.setupUi(self)
         if item_data["Mode"] == "Edit":
             self.item_to_edit = item_data["ItemData"]["ID"]
@@ -393,7 +396,7 @@ class NewFolderDialog(QtGui.QDialog):
         self.storage = item_data["Storage"]
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
-        self.ui = new_folder_dialog.Ui_NewFolderWin()
+        self.ui = Ui_NewFolderWin()
         self.ui.setupUi(self)
         self.ui.pushButtonOk.clicked.connect(self.ok)
         self.ui.pushButtonCancel.clicked.connect(self.cancel)
@@ -412,7 +415,7 @@ class NewFolderDialog(QtGui.QDialog):
 class UserSettingsDialog(QtGui.QDialog):
     def __init__(self):
         QtGui.QWidget.__init__(self, None)
-        self.ui = user_settings_dialog.Ui_UserSettingsWin()
+        self.ui = Ui_UserSettingsWin()
         self.ui.setupUi(self)
 
 
