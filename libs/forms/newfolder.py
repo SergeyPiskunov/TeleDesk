@@ -23,7 +23,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_NewFolderWin(object):
+class NewFolderWindowUi(object):
     def setupUi(self, NewFolderWin):
         NewFolderWin.setObjectName(_fromUtf8("NewFolderWin"))
         NewFolderWin.resize(345, 114)

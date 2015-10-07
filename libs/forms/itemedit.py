@@ -16,7 +16,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_EditWin(object):
+class ItemEditWindowUi(object):
     def setupUi(self, EditWin):
         EditWin.setObjectName(_fromUtf8("EditWin"))
         EditWin.setFixedSize(QtCore.QSize(450, 380))

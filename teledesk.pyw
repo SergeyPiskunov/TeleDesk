@@ -5,15 +5,15 @@ import win32crypt
 import binascii
 from PyQt4 import QtGui, QtCore
 
-from libs.db.datastorage import DataStorage
+from libs.db import datastorage
 
-from libs.forms.mainwindow import Ui_MainWindow
-from libs.forms.settings import Ui_UserSettingsWin
-from libs.forms.newfolder import Ui_NewFolderWin
-from libs.forms.itemedit import Ui_EditWin
+from libs.forms import mainwindow
+from libs.forms import settings
+from libs.forms import newfolder
+from libs.forms import itemedit
 
-from libs.core.serializer import Serializer
-from libs.core.usersettings import UserSettings
+from libs.core import serializer
+from libs.core import usersettings
 
 
 class MyWindow(QtGui.QWidget):
@@ -26,18 +26,18 @@ class MyWindow(QtGui.QWidget):
 
         super(MyWindow, self).__init__()
         # loading user settings
-        self.user_settings = UserSettings()
+        self.user_settings = usersettings.UserSettings()
         self.user_settings.load_config()
         self.user_settings.dbs
         self.sources = []
         for db in self.user_settings.dbs.values():
             self.sources.append(db)
 
-        self.ds = DataStorage(self.sources)
+        self.ds = datastorage.DataStorage(self.sources)
 
         # GUI
         QtGui.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
+        self.ui = mainwindow.MainWindowUi()
         self.ui.setupUi(self)
 
         # tree view
@@ -143,18 +143,18 @@ class MyWindow(QtGui.QWidget):
                 if top_list.__len__():
                     for menu_item in top_list:
                         item = self.ds.get_profile_info(stor["Name"], menu_item[0])
-                        if item.__len__():
-                            entry = tray_menu.addAction(item[0]["NAME"])
+                        if item:
+                            entry = tray_menu.addAction(item["NAME"])
                             entry.setIcon(computer_icon)
                             self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                         lambda menu_it=(stor["Name"], menu_item[0]): self.init_connection_frommenu(
+                                         lambda menu_it=(stor["Name"], menu_item): self.init_connection_frommenu(
                                              menu_it))
 
-                            #self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
+                            # self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
 
             tray_menu.addSeparator()
 
-            #Exit
+            # Exit
             self.ui.extact = QtGui.QAction("&Exit", self)
             tray_menu.addAction(self.ui.extact)
             self.ui.extact.triggered.connect(QtGui.qApp.quit)
@@ -202,14 +202,14 @@ class MyWindow(QtGui.QWidget):
             item = self.ds.get_profile_info(storage_name, selected_id)
 
             if item.__len__():
-                name = unicode(item[0]["NAME"])
-                server = unicode(item[0]["SERVER"])
-                port = str(item[0]["PORT"])
-                user = unicode(item[0]["USER"])
+                name = unicode(item["NAME"])
+                server = unicode(item["SERVER"])
+                port = str(item["PORT"])
+                user = unicode(item["USER"])
                 self.ui.labelStatus.setText(" Name - " + name + "\n"
-                                                    + " Server - " + server + "\n"
-                                                    + " Port - " + port + "\n"
-                                                    + " User - " + user + "\n\n")
+                                            + " Server - " + server + "\n"
+                                            + " Port - " + port + "\n"
+                                            + " User - " + user + "\n\n")
             else:
                 self.ui.labelStatus.setText("")
 
@@ -227,11 +227,11 @@ class MyWindow(QtGui.QWidget):
         self.user_settings.update_item_rating(storage_name, selected_id)
         item = self.ds.get_profile_info(storage_name, selected_id)
         if item.__len__():
-            te = Serializer().serialize_to_file_win_rdp(item[0], "7.1", item[0]["NAME"] + ".rdp")
+            te = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["NAME"] + ".rdp")
             if te:
-                os.startfile(item[0]["NAME"] + ".rdp")
+                os.startfile(item["NAME"] + ".rdp")
                 time.sleep(3)
-                os.remove(item[0]["NAME"] + ".rdp")
+                os.remove(item["NAME"] + ".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]
@@ -243,7 +243,7 @@ class MyWindow(QtGui.QWidget):
             input_dialog = ItemEditDialog(self.ds,
                                           {"Storage": storage_name,
                                            "Parent": None,
-                                           "ItemData": item[0],
+                                           "ItemData": item,
                                            "Mode": "Edit"})
             input_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
             input_dialog.exec_()
@@ -252,14 +252,14 @@ class MyWindow(QtGui.QWidget):
             item = self.ds.get_profile_info(storage_name, selected_id)
 
             if item.__len__():
-                name = unicode(item[0]["NAME"])
-                server = unicode(item[0]["SERVER"])
-                port = str(item[0]["PORT"])
-                user = unicode(item[0]["USER"])
+                name = unicode(item["NAME"])
+                server = unicode(item["SERVER"])
+                port = str(item["PORT"])
+                user = unicode(item["USER"])
                 self.ui.labelStatus.setText(" Name - " + name + "\n"
-                                                    + " Server - " + server + "\n"
-                                                    + " Port - " + port + "\n"
-                                                    + " User - " + user + "\n\n")
+                                            + " Server - " + server + "\n"
+                                            + " Port - " + port + "\n"
+                                            + " User - " + user + "\n\n")
             else:
                 self.ui.labelStatus.setText("")
 
@@ -270,7 +270,7 @@ class MyWindow(QtGui.QWidget):
         item = self.ds.get_folder_id(storage_name, selected_name)
 
         if item.__len__():
-            item_data = {"Storage": storage_name, "Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddItem"}
+            item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddItem"}
             input_dialog = ItemEditDialog(self.ds, item_data)
             input_dialog.exec_()
             if input_dialog.updated:
@@ -283,7 +283,7 @@ class MyWindow(QtGui.QWidget):
 
         item = self.ds.get_folder_id(storage_name, selected_name)
         if item.__len__():
-            item_data = {"Storage": storage_name, "Parent": str(item[0]["ID"]), "ItemData": None, "Mode": "AddFolder"}
+            item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddFolder"}
             inputter = NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
@@ -335,7 +335,7 @@ class ItemEditDialog(QtGui.QDialog):
         self.updated = False
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
-        self.ui = Ui_EditWin()
+        self.ui = itemedit.ItemEditWindowUi()
         self.ui.setupUi(self)
         if item_data["Mode"] == "Edit":
             self.item_to_edit = item_data["ItemData"]["ID"]
@@ -398,7 +398,7 @@ class NewFolderDialog(QtGui.QDialog):
         self.storage = item_data["Storage"]
         self.parent = item_data["Parent"]
         QtGui.QWidget.__init__(self, None)
-        self.ui = Ui_NewFolderWin()
+        self.ui = newfolder.NewFolderWindowUi()
         self.ui.setupUi(self)
         self.ui.pushButtonOk.clicked.connect(self.ok)
         self.ui.pushButtonCancel.clicked.connect(self.cancel)
@@ -417,7 +417,7 @@ class NewFolderDialog(QtGui.QDialog):
 class UserSettingsDialog(QtGui.QDialog):
     def __init__(self):
         QtGui.QWidget.__init__(self, None)
-        self.ui = Ui_UserSettingsWin()
+        self.ui = settings.SettingsWindowUi()
         self.ui.setupUi(self)
 
 
@@ -428,6 +428,6 @@ if __name__ == "__main__":
     window = MyWindow()
     window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                               app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
-    #window.setSizePolicy(0, 0)
+    # window.setSizePolicy(0, 0)
     window.show()
     sys.exit(app.exec_())

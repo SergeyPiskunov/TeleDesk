@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from dbconnector import DBConnector
 
 
@@ -24,7 +25,7 @@ class DataStorage():
 
     def get_folders_children(self, database, parameters=None):
         source = self.data_bases.get(database)
-        return source.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parameters)
+        return source.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parameters, True)
 
     def get_profile_info(self, database, parameters=None):
         source = self.data_bases.get(database)
@@ -43,7 +44,7 @@ class DataStorage():
 
     def get_child_elements(self, database, idd):
         source = self.data_bases.get(database)
-        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)", idd)
+        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)", idd, True)
 
     def delete_folder(self, database, idd):
         source = self.data_bases.get(database)

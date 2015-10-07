@@ -17,7 +17,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_MainWindow(object):
+class MainWindowUi(object):
     def setupUi(self, MyWin):
         MyWin.setObjectName(_fromUtf8("MyWin"))
         MyWin.resize(243, 579)
