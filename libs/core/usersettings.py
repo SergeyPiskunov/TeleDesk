@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pickle
 
 
@@ -5,68 +6,88 @@ class UserSettings(object):
     """ Initializing with path to user settings file.
     Allow to load and save user settings via pickle """
 
-    def __init__(self, config_path='uconfig.cfg'):
-        self.config_path = config_path
-        self.config = {}
-        self.login = ''
-        self.password = ''
-        self.language = ''
-        self.dbs = {}
-        self.topten = {}
+    def __init__(self, config_file='u_config.cfg'):
+        self.config_file = config_file
+        self.master_login = ''
+        self.master_password = ''
+        self.ui_language = ''
+        self.databases = {}
+        self.top_ten_connections = {}
 
     def reset_to_dafaults(self):
-        self.login = 'root'
-        self.password = 'toor'
-        self.language = 'en'
-        self.topten = {"Local_storage": {}}
-        self.dbs = {'local_storage': {"Name": "Local_storage", "Type": "local", "Path": "config.db"},
-                    'Common_storage': {"Name": "Common_storage", "Type": "local", "Path": "config2.db"}}
+        """ Writes default settings to the self.config_file """
+        self.master_login = 'root'
+        self.master_password = 'toor'
+        self.ui_language = 'en'
+        self.top_ten_connections = {"Local_storage": {}}
+        self.databases = [{"Name": "Local_storage",
+                           "Type": "local",
+                           "Path": "config.db",
+                           "User": "",
+                           "Password": "",
+                           "Properties": {}},
+                          {"Name": "FTP_storage",
+                           "Type": "ftp",
+                           "Path": "config2.db",
+                           "User": "user",
+                           "Password": "pwd",
+                           "Properties": {"Server": "10.10.10.10",
+                                          "Port": 21,
+                                          "FTPUser": "ftpuser",
+                                          "FTPPassword": "ftppwd"}}]
+
+
+
+
+
+
         self.save_config()
 
     def load_config(self):
-        with open(self.config_path, 'rb') as p_file:
-            self.config = pickle.load(p_file)
-            self.login = self.config['login']
-            self.password = self.config['password']
-            self.language = self.config['language']
-            self.dbs = self.config['storage_settings']
-            self.topten = self.config['topten']
+        """ Loads all user settings from the self.config_file """
+        with open(self.config_file, 'rb') as cfg_file:
+            config = pickle.load(cfg_file)
+            self.master_login = config['master_login']
+            self.master_password = config['master_password']
+            self.ui_language = config['ui_language']
+            self.databases = config['databases']
+            self.top_ten_connections = config['top_ten_connections']
 
     def save_config(self):
-        self.config = {
-            'language': self.language,
-            'login': self.login,
-            'password': self.password,
-            'storage_settings': self.dbs,
-            'topten': self.topten}
-        with open(self.config_path, 'wb') as p_file:
-            pickle.dump(self.config, p_file)
+        """ Saves all user settings in the self.config_file """
+        config = {
+            'ui_language': self.ui_language,
+            'master_login': self.master_login,
+            'master_password': self.master_password,
+            'databases': self.databases,
+            'top_ten_connections': self.top_ten_connections}
+        with open(self.config_file, 'wb') as cfg_file:
+            pickle.dump(config, cfg_file)
 
     def update_item_rating(self, storage_name, item):
-        if storage_name in self.topten.keys():
-            if item in self.topten[storage_name].keys():
-                self.topten[storage_name][item] += 1
+        """ Increments usage rating of given connection
+            in a given storage name"""
+        if storage_name in self.top_ten_connections.keys():
+            if item in self.top_ten_connections[storage_name].keys():
+                self.top_ten_connections[storage_name][item] += 1
             else:
-                self.topten[storage_name][item] = 1
+                self.top_ten_connections[storage_name][item] = 1
         else:
-            self.topten[storage_name] = {item: 1}
+            self.top_ten_connections[storage_name] = {item: 1}
+        self.save_config()
 
-        with open(self.config_path, 'wb') as p_file:
-            pickle.dump(self.config, p_file)
-
-
-    def get_rated_items(self, storage_name, items=5):
-        toplist = sorted(self.topten[storage_name].items(), key=lambda x: x[1], reverse=True)
+    def get_top_ten_connections(self, storage_name, items=5):
+        """ Returns top(items) most frequently used connections """
+        top_list = sorted(self.top_ten_connections[storage_name].items(), key=lambda x: x[1], reverse=True)
         result = []
-        if items > len(toplist):
-            items = len(toplist)
-
+        if items > len(top_list):
+            items = len(top_list)
         for i in range(items):
-            result.append(toplist[i][0])
-        return toplist
+            result.append(top_list[i][0])
+        return top_list
 
 
 if __name__ == "__main__":
-    usersettings = UserSettings()
-    usersettings.reset_to_dafaults()
-    # usersettings.load_config()
+    user_settings = UserSettings()
+    user_settings.reset_to_dafaults()
+    # user_settings.load_config()

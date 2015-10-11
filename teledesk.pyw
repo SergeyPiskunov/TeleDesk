@@ -19,6 +19,9 @@ from libs.core import usersettings
 class MyWindow(QtGui.QWidget):
     # datastorage root element id
     ROOT_ELEMENT_ID = "1"
+    APP_ICON = "res/computer.png"
+    FOLDER_ICON = "res/folder.png"
+    SERVER_ICON = "res/computer.png"
 
     """ UI class"""
 
@@ -28,12 +31,7 @@ class MyWindow(QtGui.QWidget):
         # loading user settings
         self.user_settings = usersettings.UserSettings()
         self.user_settings.load_config()
-        self.user_settings.dbs
-        self.sources = []
-        for db in self.user_settings.dbs.values():
-            self.sources.append(db)
-
-        self.ds = datastorage.DataStorage(self.sources)
+        self.ds = datastorage.DataStorage(self.user_settings.databases)
 
         # GUI
         QtGui.QWidget.__init__(self, parent)
@@ -47,7 +45,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.setColumnHidden(1, True)
         self.ui.treeView.header().close()
 
-        for stor in self.sources:
+        for stor in self.user_settings.databases:
             root = QtGui.QStandardItem(stor["Name"])
             self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
@@ -65,7 +63,8 @@ class MyWindow(QtGui.QWidget):
         # Minimizing to tray
         style = self.style()
         # Set the window and tray icon to something
-        icon = style.standardIcon(QtGui.QStyle.SP_ComputerIcon)
+        # icon = style.standardIcon(QtGui.QStyle.SP_ComputerIcon)
+        icon = MyWindow.APP_ICON
         self.tray_icon = QtGui.QSystemTrayIcon()
         self.tray_icon.setIcon(QtGui.QIcon(icon))
         self.setWindowIcon(QtGui.QIcon(icon))
@@ -133,11 +132,11 @@ class MyWindow(QtGui.QWidget):
 
             tray_menu.addSeparator()
 
-            folder_icon = QtGui.QIcon("res/folder.png")
-            computer_icon = QtGui.QIcon("res/computer.png")
+            folder_icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
+            computer_icon = QtGui.QIcon(MyWindow.SERVER_ICON)
 
-            for stor in self.sources:
-                top_list = self.user_settings.get_rated_items(stor["Name"], 32)
+            for stor in self.user_settings.databases:
+                top_list = self.user_settings.get_top_ten_connections(stor["Name"], 32)
                 node_entry = tray_menu.addAction(stor["Name"])
                 node_entry.setIcon(folder_icon)
                 if top_list.__len__():
@@ -170,9 +169,9 @@ class MyWindow(QtGui.QWidget):
 
             # icon = QtGui.QIcon()
             if str(chld["PROFILE"]) == u'':
-                icon = QtGui.QIcon("res/folder.png")
+                icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
             elif str(chld["PROFILE"]):
-                icon = QtGui.QIcon("res/computer.png")
+                icon = QtGui.QIcon(MyWindow.SERVER_ICON)
             else:
                 pass
 
@@ -187,7 +186,7 @@ class MyWindow(QtGui.QWidget):
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
         self.ui.treeView.setModel(model)
-        for stor in self.sources:
+        for stor in self.user_settings.databases:
             root = QtGui.QStandardItem(stor["Name"])
             self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
@@ -278,12 +277,13 @@ class MyWindow(QtGui.QWidget):
 
     def add_new_folder(self):
         index = self.ui.treeView.selectedIndexes()[0]
-        selected_name = str(index.model().itemFromIndex(index).text())
+        #selected_name = str(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).text())
 
-        item = self.ds.get_folder_id(storage_name, selected_name)
-        if item.__len__():
-            item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddFolder"}
+        #item = self.ds.get_folder_id(storage_name, selected_name)
+        #if item.__len__():
+        if 1 == 1:
+            item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
             inputter = NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
@@ -312,7 +312,7 @@ class MyWindow(QtGui.QWidget):
             self.update_tree()
 
     def show_user_settings(self):
-        settings_dialog = UserSettingsDialog()
+        settings_dialog = UserSettingsDialog(self.user_settings)
         # settings_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
         settings_dialog.exec_()
 
@@ -415,16 +415,118 @@ class NewFolderDialog(QtGui.QDialog):
 
 
 class UserSettingsDialog(QtGui.QDialog):
-    def __init__(self):
+    def __init__(self, usersett):
         QtGui.QWidget.__init__(self, None)
         self.ui = settings.SettingsWindowUi()
         self.ui.setupUi(self)
+        self.usersett = usersett
+
+        # dividing list of databases into local and FTP databases
+        # to display them in separate tables
+        localdatabases = [dict(Name=x["Name"],
+                               Path=x["Path"],
+                               User=x["User"],
+                               Password=x["Password"]) for x in self.usersett.databases
+                          if x["Type"] == "local"]
+
+        localdatabases_columns = {"Name": "",
+                                  "Path": "",
+                                  "User": "",
+                                  "Password": ""}
+        self.ui.localStorageTableView.setModel(settings.SettingsTableModel(localdatabases, localdatabases_columns))
+
+        self.ftpdatabases = [dict(Name=x["Name"],
+                                  Path=x["Path"],
+                                  User=x["User"],
+                                  Password=x["Password"],
+                                  Server=x["Properties"]["Server"],
+                                  Port=x["Properties"]["Port"],
+                                  FTPUser=x["Properties"]["FTPUser"],
+                                  FTPPassword=x["Properties"]["FTPPassword"]) for x in self.usersett.databases
+                             if x["Type"] == "ftp"]
+
+        ftpdatabases_columns = {"Name": "",
+                                "Server": "",
+                                "Port": "",
+                                "FTPUser": "",
+                                "FTPPassword": "",
+                                "Path": "",
+                                "User": "",
+                                "Password": ""}
+
+        self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(self.ftpdatabases, ftpdatabases_columns))
+
+        self.ui.OKButton.clicked.connect(self.save)
+        self.ui.CancelButton.clicked.connect(self.cancel)
+        self.ui.deleteLocalStorageButton.clicked.connect(self.removeLocalStorageRow)
+        self.ui.addLocalStorageButton.clicked.connect(self.addLocalStorageRow)
+        self.ui.deleteFTPStorageButton.clicked.connect(self.removeFTPStorageRow)
+        self.ui.addFTPStorageButton.clicked.connect(self.addFTPStorageRow)
+
+    def save(self):
+        self.usersett.databases = self.ui.localStorageTableView.model().databases
+        self.usersett.databases = []
+        localdatabases = [dict(Name=x["Name"],
+                               Type="local",
+                               Properties={},
+                               Path=x["Path"],
+                               User=x["User"],
+                               Password=x["Password"])
+                          for x in self.ui.localStorageTableView.model().databases]
+
+        ftpdatabases = [dict(Name=x["Name"],
+                             Type="ftp",
+                             Properties=dict(Server=x["Server"],
+                                             Port=x["Port"],
+                                             FTPUser=x["FTPUser"],
+                                             FTPPassword=x["FTPPassword"]),
+                             Path=x["Path"],
+                             User=x["User"],
+                             Password=x["Password"])
+                        for x in self.ui.FTPStorageTableView.model().databases]
+
+        self.usersett.databases = localdatabases + ftpdatabases
+
+        self.usersett.save_config()
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+    def addLocalStorageRow(self):
+        selected_index = self.ui.localStorageTableView.model().index(len(self.usersett.databases), 0)
+
+        self.ui.localStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
+
+    def removeLocalStorageRow(self):
+        selected_index = self.ui.localStorageTableView.selectionModel().selectedIndexes()[0]
+
+        self.ui.localStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
+
+    def addFTPStorageRow(self):
+        selected_index = self.ui.FTPStorageTableView.model().index(len(self.usersett.databases), 0)
+
+        self.ui.FTPStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
+
+    def removeFTPStorageRow(self):
+        selected_index = self.ui.FTPStorageTableView.selectionModel().selectedIndexes()[0]
+
+        self.ui.FTPStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
 
 
 if __name__ == "__main__":
     import sys
 
     app = QtGui.QApplication(sys.argv)
+
+    # app.setStyle("Windows")
+    # app.setStyle("WindowsXP")
+    # app.setStyle("WindowsVista")
+    # app.setStyle("Motif")
+    # app.setStyle("CDE")
+    app.setStyle("Plastique")
+    # app.setStyle("Cleanlooks")
+
     window = MyWindow()
     window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                               app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
