@@ -14,7 +14,7 @@ class UserSettings(object):
         self.databases = {}
         self.top_ten_connections = {}
 
-    def reset_to_dafaults(self):
+    def reset_to_dafaults(self, config_file = None):
         """ Writes default settings to the self.config_file """
         self.master_login = 'root'
         self.master_password = 'toor'
@@ -25,22 +25,7 @@ class UserSettings(object):
                            "Path": "config.db",
                            "User": "",
                            "Password": "",
-                           "Properties": {}},
-                          {"Name": "FTP_storage",
-                           "Type": "ftp",
-                           "Path": "config2.db",
-                           "User": "user",
-                           "Password": "pwd",
-                           "Properties": {"Server": "10.10.10.10",
-                                          "Port": 21,
-                                          "FTPUser": "ftpuser",
-                                          "FTPPassword": "ftppwd"}}]
-
-
-
-
-
-
+                           "Properties": {}}]
         self.save_config()
 
     def load_config(self):

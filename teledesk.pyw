@@ -31,7 +31,6 @@ class MyWindow(QtGui.QWidget):
         # loading user settings
         self.user_settings = usersettings.UserSettings()
         self.user_settings.load_config()
-        self.ds = datastorage.DataStorage(self.user_settings.databases)
 
         # GUI
         QtGui.QWidget.__init__(self, parent)
@@ -39,17 +38,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.setupUi(self)
 
         # tree view
-        model = QtGui.QStandardItemModel()
-        model.setHorizontalHeaderLabels(['Name'])
-        self.ui.treeView.setModel(model)
-        self.ui.treeView.setColumnHidden(1, True)
-        self.ui.treeView.header().close()
-
-        for stor in self.user_settings.databases:
-            root = QtGui.QStandardItem(stor["Name"])
-            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
-            model.appendRow(root)
-            self.ui.treeView.expand(model.indexFromItem(root))
+        self.show_connections_tree()
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -59,6 +48,7 @@ class MyWindow(QtGui.QWidget):
         self.ui.addServerAction.triggered.connect(self.add_new_item)
         self.ui.removeServerAction.triggered.connect(self.remove_item)
         self.ui.settingsAction.triggered.connect(self.show_user_settings)
+        self.ui.refresh_DBAction.triggered.connect(self.show_connections_tree)
 
         # Minimizing to tray
         style = self.style()
@@ -159,6 +149,19 @@ class MyWindow(QtGui.QWidget):
             self.ui.extact.triggered.connect(QtGui.qApp.quit)
 
             self.tray_icon.contextMenu().popup(QtGui.QCursor.pos())
+
+    def show_connections_tree(self):
+        self.ds = datastorage.DataStorage(self.user_settings.databases)
+        model = QtGui.QStandardItemModel()
+        model.setHorizontalHeaderLabels(['Name'])
+        self.ui.treeView.setModel(model)
+        self.ui.treeView.setColumnHidden(1, True)
+        self.ui.treeView.header().close()
+        for stor in self.user_settings.databases:
+            root = QtGui.QStandardItem(stor["Name"])
+            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
+            model.appendRow(root)
+            self.ui.treeView.expand(model.indexFromItem(root))
 
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
@@ -425,13 +428,19 @@ class UserSettingsDialog(QtGui.QDialog):
 
         # dividing list of databases into local and FTP databases
         # to display them in separate tables
+        localdatabases_columns = OrderedDict([("Name", ""),
+                                              ("Path", ""),
+                                              ("User", ""),
+                                              ("Password", "")])
 
-        # localdatabases = [lambda x: OrderedDict([("Name"=x["Name"]),
-        # ("Path"=x["Path"],
-        # ("User"=x["User"],
-        #                       ("Password"=x["Password"]]) for x in self.usersett.databases
-        #                  if x["Type"] == "local"]
-
+        ftpdatabases_columns = OrderedDict([("Name", ""),
+                                                    ("Path", ""),
+                                                    ("Server", ""),
+                                                    ("Port", ""),
+                                                    ("FTPUser", ""),
+                                                    ("FTPPassword", ""),
+                                                    ("User", ""),
+                                                    ("Password", "")])
         localdatabases = []
         for x in self.usersett.databases:
             if x["Type"] == "local":
@@ -441,22 +450,8 @@ class UserSettingsDialog(QtGui.QDialog):
                                  ("Password", x["Password"])])
                 localdatabases.append(d)
 
-        localdatabases_columns = OrderedDict([("Name", ""),
-                                              ("Path", ""),
-                                              ("User", ""),
-                                              ("Password", "")])
-
         self.ui.localStorageTableView.setModel(settings.SettingsTableModel(localdatabases, localdatabases_columns))
 
-        #self.ftpdatabases = [OrderedDict(Name=x["Name"],
-        #                          Path=x["Path"],
-        #                          User=x["User"],
-        #                          Password=x["Password"],
-        #                          Server=x["Properties"]["Server"],
-        #                          Port=x["Properties"]["Port"],
-        #                          FTPUser=x["Properties"]["FTPUser"],
-        #                          FTPPassword=x["Properties"]["FTPPassword"]) for x in self.usersett.databases
-        #                     if x["Type"] == "ftp"]
         ftpdatabases = []
         for x in self.usersett.databases:
             if x["Type"] == "ftp":
@@ -470,14 +465,6 @@ class UserSettingsDialog(QtGui.QDialog):
                                  ("Port", x["Properties"]["Port"])])
                 ftpdatabases.append(d)
 
-                ftpdatabases_columns = OrderedDict([("Name", ""),
-                                                    ("Path", ""),
-                                                    ("Server", ""),
-                                                    ("Port", ""),
-                                                    ("FTPUser", ""),
-                                                    ("FTPPassword", ""),
-                                                    ("User", ""),
-                                                    ("Password", "")])
         self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(ftpdatabases, ftpdatabases_columns))
 
         self.ui.OKButton.clicked.connect(self.save)
@@ -486,6 +473,7 @@ class UserSettingsDialog(QtGui.QDialog):
         self.ui.addLocalStorageButton.clicked.connect(self.addLocalStorageRow)
         self.ui.deleteFTPStorageButton.clicked.connect(self.removeFTPStorageRow)
         self.ui.addFTPStorageButton.clicked.connect(self.addFTPStorageRow)
+        self.ui.resetButton.clicked.connect(self.resetToDefaults)
 
     def save(self):
         self.usersett.databases = self.ui.localStorageTableView.model().databases
@@ -537,6 +525,13 @@ class UserSettingsDialog(QtGui.QDialog):
 
         self.ui.FTPStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
 
+    def resetToDefaults(self):
+        reply = QtGui.QMessageBox.question(self, 'Message', "Do ypu want to reset config?",
+                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                   QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            self.usersett.reset_to_dafaults()
+            self.close()
 
 if __name__ == "__main__":
     import sys

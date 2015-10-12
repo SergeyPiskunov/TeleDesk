@@ -41,6 +41,9 @@ class MainWindowUi(object):
         self.settingsAction = QtGui.QAction('&Settings', MyWin)
         importRdpAction = QtGui.QAction('&Import from *.rdp file', MyWin)
 
+        #re-read databases
+        self.refresh_DBAction = QtGui.QAction('&Refresh DB`s', MyWin)
+
         #exit application
         self.exitAction = QtGui.QAction('&Exit', MyWin)
         self.exitAction.setShortcut('Ctrl+Q')
@@ -73,8 +76,9 @@ class MainWindowUi(object):
         self.deleteGroupAction.setStatusTip('Delete group')
 
         #main menu
-        fileMenu = self.mainMenu.addMenu('&Main')
+        fileMenu = self.mainMenu.addMenu('&Menu')
         fileMenu.addAction(self.settingsAction)
+        fileMenu.addAction(self.refresh_DBAction)
         fileMenu.addAction(importRdpAction)
         fileMenu.addAction(self.exitAction)
 
@@ -101,6 +105,7 @@ class MainWindowUi(object):
     def openMenu(self, position):
 
         indexes = self.treeView.selectedIndexes()
+        level = -1
         if len(indexes) > 0:
 
             level = 0
@@ -120,5 +125,9 @@ class MainWindowUi(object):
             menu.addAction(self.editServerAction)
             menu.addAction(self.removeServerAction)
             menu.addAction(self.exportToRDPAction)
+
+        elif level == -1:
+            menu.addAction(self.refresh_DBAction)
+
 
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
