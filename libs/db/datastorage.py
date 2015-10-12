@@ -22,6 +22,30 @@ class DataStorage():
         for db in data_sources:
             database = DataBase(**db)
             self.data_bases[db["Name"]] = database
+            #if the database is blank create all necessary tables
+            tables = database.get_data("SELECT name FROM sqlite_master")
+            if not tables:
+                database.execute("CREATE TABLE `FOLDERS` ("
+                                 "`ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                                 "`Parent` INTEGER,"
+                                 "`Name` TEXT,"
+                                 "`Profile` TEXT);")
+
+                database.execute("CREATE TABLE `PROFILES` ("
+                                 "`ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
+                                 "`Namee` TEXT,"
+                                 "`Aliass` TEXT,"
+                                 "`Rating` INTEGER,"
+                                 "`Server` TEXT,"
+                                 "`Port` TEXT,"
+                                 "`User` TEXT,"
+                                 "`Domain` TEXT,"
+                                 "`Password` TEXT,"
+                                 "`Folder` INTEGER);")
+
+                database.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
+                                 "NULL,'" + db["Name"] + "', NULL)")
+
 
     def get_folders_children(self, database, parameters=None):
         source = self.data_bases.get(database)
@@ -39,26 +63,29 @@ class DataStorage():
 
     def get_profile_id(self, database, parameters=None):
         source = self.data_bases.get(database)
-        #return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
-        return source.get_data("SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1", parameters)
+        # return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
+        return source.get_data(
+            "SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1",
+            parameters)
 
     def get_child_elements(self, database, idd):
         source = self.data_bases.get(database)
-        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)", idd, True)
+        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)",
+                               idd, True)
 
     def delete_folder(self, database, idd):
         source = self.data_bases.get(database)
 
-        #deleting all child profiles
+        # deleting all child profiles
         source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = \"" + idd + "\")")
 
-        #deleting all child folders
+        # deleting all child folders
         source.execute("DELETE FROM FOLDERS WHERE PARENT = \"" + idd + "\"")
 
-        #deleting folder
+        # deleting folder
         source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE ID = \"" + idd + "\")")
 
-        #deleting profile
+        # deleting profile
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
 
     def create_new_folder(self, database, parent, name):

@@ -153,7 +153,6 @@ class SettingsTableModel(QtCore.QAbstractTableModel):
         self.databases = databases
         self.column_structure = column_structure
 
-
     def rowCount(self, parent):
         return len(self.databases)
 
@@ -196,7 +195,7 @@ class SettingsTableModel(QtCore.QAbstractTableModel):
                 else:
                     return self.column_structure.keys()[section]
             else:
-                return QtCore.QString("Storage %1").arg(section + 1)
+                return QtCore.QString("%1").arg(section + 1)
 
     def insertRow(self, int_row, parent=QtCore.QAbstractItemModel):
         self.beginInsertRows(parent, 1, 1)

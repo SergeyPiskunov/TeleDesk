@@ -137,9 +137,9 @@ class MyWindow(QtGui.QWidget):
 
             for stor in self.user_settings.databases:
                 top_list = self.user_settings.get_top_ten_connections(stor["Name"], 32)
-                node_entry = tray_menu.addAction(stor["Name"])
-                node_entry.setIcon(folder_icon)
-                if top_list.__len__():
+                if top_list:
+                    node_entry = tray_menu.addAction(stor["Name"])
+                    node_entry.setIcon(folder_icon)
                     for menu_item in top_list:
                         item = self.ds.get_profile_info(stor["Name"], menu_item[0])
                         if item:
@@ -277,11 +277,11 @@ class MyWindow(QtGui.QWidget):
 
     def add_new_folder(self):
         index = self.ui.treeView.selectedIndexes()[0]
-        #selected_name = str(index.model().itemFromIndex(index).text())
+        # selected_name = str(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).text())
 
-        #item = self.ds.get_folder_id(storage_name, selected_name)
-        #if item.__len__():
+        # item = self.ds.get_folder_id(storage_name, selected_name)
+        # if item.__len__():
         if 1 == 1:
             item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
             inputter = NewFolderDialog(self.ds, item_data)
@@ -416,6 +416,8 @@ class NewFolderDialog(QtGui.QDialog):
 
 class UserSettingsDialog(QtGui.QDialog):
     def __init__(self, usersett):
+        from collections import OrderedDict
+
         QtGui.QWidget.__init__(self, None)
         self.ui = settings.SettingsWindowUi()
         self.ui.setupUi(self)
@@ -423,38 +425,60 @@ class UserSettingsDialog(QtGui.QDialog):
 
         # dividing list of databases into local and FTP databases
         # to display them in separate tables
-        localdatabases = [dict(Name=x["Name"],
-                               Path=x["Path"],
-                               User=x["User"],
-                               Password=x["Password"]) for x in self.usersett.databases
-                          if x["Type"] == "local"]
 
-        localdatabases_columns = {"Name": "",
-                                  "Path": "",
-                                  "User": "",
-                                  "Password": ""}
+        # localdatabases = [lambda x: OrderedDict([("Name"=x["Name"]),
+        # ("Path"=x["Path"],
+        # ("User"=x["User"],
+        #                       ("Password"=x["Password"]]) for x in self.usersett.databases
+        #                  if x["Type"] == "local"]
+
+        localdatabases = []
+        for x in self.usersett.databases:
+            if x["Type"] == "local":
+                d = OrderedDict([("Name", x["Name"]),
+                                 ("Path", x["Path"]),
+                                 ("User", x["User"]),
+                                 ("Password", x["Password"])])
+                localdatabases.append(d)
+
+        localdatabases_columns = OrderedDict([("Name", ""),
+                                              ("Path", ""),
+                                              ("User", ""),
+                                              ("Password", "")])
+
         self.ui.localStorageTableView.setModel(settings.SettingsTableModel(localdatabases, localdatabases_columns))
 
-        self.ftpdatabases = [dict(Name=x["Name"],
-                                  Path=x["Path"],
-                                  User=x["User"],
-                                  Password=x["Password"],
-                                  Server=x["Properties"]["Server"],
-                                  Port=x["Properties"]["Port"],
-                                  FTPUser=x["Properties"]["FTPUser"],
-                                  FTPPassword=x["Properties"]["FTPPassword"]) for x in self.usersett.databases
-                             if x["Type"] == "ftp"]
+        #self.ftpdatabases = [OrderedDict(Name=x["Name"],
+        #                          Path=x["Path"],
+        #                          User=x["User"],
+        #                          Password=x["Password"],
+        #                          Server=x["Properties"]["Server"],
+        #                          Port=x["Properties"]["Port"],
+        #                          FTPUser=x["Properties"]["FTPUser"],
+        #                          FTPPassword=x["Properties"]["FTPPassword"]) for x in self.usersett.databases
+        #                     if x["Type"] == "ftp"]
+        ftpdatabases = []
+        for x in self.usersett.databases:
+            if x["Type"] == "ftp":
+                d = OrderedDict([("Name", x["Name"]),
+                                 ("Path", x["Path"]),
+                                 ("FTPUser", x["Properties"]["FTPUser"]),
+                                 ("FTPPassword", x["Properties"]["FTPPassword"]),
+                                 ("User", x["User"]),
+                                 ("Password", x["Password"]),
+                                 ("Server", x["Properties"]["Server"]),
+                                 ("Port", x["Properties"]["Port"])])
+                ftpdatabases.append(d)
 
-        ftpdatabases_columns = {"Name": "",
-                                "Server": "",
-                                "Port": "",
-                                "FTPUser": "",
-                                "FTPPassword": "",
-                                "Path": "",
-                                "User": "",
-                                "Password": ""}
-
-        self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(self.ftpdatabases, ftpdatabases_columns))
+                ftpdatabases_columns = OrderedDict([("Name", ""),
+                                                    ("Path", ""),
+                                                    ("Server", ""),
+                                                    ("Port", ""),
+                                                    ("FTPUser", ""),
+                                                    ("FTPPassword", ""),
+                                                    ("User", ""),
+                                                    ("Password", "")])
+        self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(ftpdatabases, ftpdatabases_columns))
 
         self.ui.OKButton.clicked.connect(self.save)
         self.ui.CancelButton.clicked.connect(self.cancel)

@@ -19,7 +19,7 @@ class UserSettings(object):
         self.master_login = 'root'
         self.master_password = 'toor'
         self.ui_language = 'en'
-        self.top_ten_connections = {"Local_storage": {}}
+        self.top_ten_connections = {}
         self.databases = [{"Name": "Local_storage",
                            "Type": "local",
                            "Path": "config.db",
@@ -78,13 +78,20 @@ class UserSettings(object):
 
     def get_top_ten_connections(self, storage_name, items=5):
         """ Returns top(items) most frequently used connections """
-        top_list = sorted(self.top_ten_connections[storage_name].items(), key=lambda x: x[1], reverse=True)
-        result = []
-        if items > len(top_list):
-            items = len(top_list)
-        for i in range(items):
-            result.append(top_list[i][0])
-        return top_list
+        if self.top_ten_connections:
+
+            if not self.top_ten_connections.has_key(storage_name):
+                return None
+
+            top_list = sorted(self.top_ten_connections[storage_name].items(), key=lambda x: x[1], reverse=True)
+            result = []
+            if items > len(top_list):
+                items = len(top_list)
+            for i in range(items):
+                result.append(top_list[i][0])
+            return top_list
+        else:
+            return None
 
 
 if __name__ == "__main__":

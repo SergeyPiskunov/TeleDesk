@@ -13,7 +13,10 @@ class DBConnector(object):
         with self.db:
             self.db.row_factory = sqlite.Row
             cursor = self.db.cursor()
-            cursor.execute(query, (parameters,))
+            if parameters:
+                cursor.execute(query, (parameters,))
+            else:
+                cursor.execute(query)
 
             result = cursor.fetchall()
             if return_collection:
@@ -36,7 +39,6 @@ class DBConnector(object):
 
             if return_lastrow:
                 return cursor.lastrowid
-
 
 if __name__ == "__main__":
     dbc = DBConnector("config.db")
