@@ -14,6 +14,7 @@ from libs.forms import itemedit
 
 from libs.core import serializer
 from libs.core import usersettings
+from libs.core import ftp_updater
 
 
 class MyWindow(QtGui.QWidget):
@@ -26,7 +27,6 @@ class MyWindow(QtGui.QWidget):
     """ UI class"""
 
     def __init__(self, parent=None):
-
         super(MyWindow, self).__init__()
         # loading user settings
         self.user_settings = usersettings.UserSettings()
@@ -37,8 +37,18 @@ class MyWindow(QtGui.QWidget):
         self.ui = mainwindow.MainWindowUi()
         self.ui.setupUi(self)
 
+
         # tree view
-        self.show_connections_tree()
+        self.show_connections_tree(True)
+
+        for stor in self.user_settings.databases:
+            if stor["Type"] == 'ftp':
+                self.ftp_update = ftp_updater.FTPUpdater(self.ui, stor, None)
+                self.connect(self.ftp_update, QtCore.SIGNAL("show_connections_tree()"),
+                             self.show_connections_tree, QtCore.Qt.QueuedConnection)
+                self.ftp_update.update()
+
+
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -61,6 +71,9 @@ class MyWindow(QtGui.QWidget):
 
         # Restore the window when the tray icon is double clicked.
         self.tray_icon.activated.connect(self.restore_window_from_tray)
+
+
+
 
     def event(self, event):
         if (event.type() == QtCore.QEvent.WindowStateChange and
@@ -150,7 +163,8 @@ class MyWindow(QtGui.QWidget):
 
             self.tray_icon.contextMenu().popup(QtGui.QCursor.pos())
 
-    def show_connections_tree(self):
+    def show_connections_tree(self, onlylocal=False):
+
         self.ds = datastorage.DataStorage(self.user_settings.databases)
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
@@ -158,10 +172,13 @@ class MyWindow(QtGui.QWidget):
         self.ui.treeView.setColumnHidden(1, True)
         self.ui.treeView.header().close()
         for stor in self.user_settings.databases:
+            if onlylocal and stor["Type"] != 'local':
+                continue
             root = QtGui.QStandardItem(stor["Name"])
             self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
+
 
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
