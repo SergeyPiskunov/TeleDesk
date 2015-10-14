@@ -36,7 +36,7 @@ class MyWindow(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.ui = mainwindow.MainWindowUi()
         self.ui.setupUi(self)
-
+        self.tray_menu = QtGui.QMenu(None)
 
         # tree view
         self.show_connections_tree(True)
@@ -46,9 +46,9 @@ class MyWindow(QtGui.QWidget):
                 self.ftp_update = ftp_updater.FTPUpdater(self.ui, stor, None)
                 self.connect(self.ftp_update, QtCore.SIGNAL("show_connections_tree()"),
                              self.show_connections_tree, QtCore.Qt.QueuedConnection)
+                self.connect(self.ftp_update, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
+                             self.show_msg, QtCore.Qt.QueuedConnection)
                 self.ftp_update.update()
-
-
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -72,8 +72,8 @@ class MyWindow(QtGui.QWidget):
         # Restore the window when the tray icon is double clicked.
         self.tray_icon.activated.connect(self.restore_window_from_tray)
 
-
-
+    def show_msg(self, msg):
+        QtGui.QMessageBox.information(self, "Info", msg, QtGui.QMessageBox.Ok)
 
     def event(self, event):
         if (event.type() == QtCore.QEvent.WindowStateChange and
@@ -92,8 +92,6 @@ class MyWindow(QtGui.QWidget):
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
         else:
-            self.tray_icon.show()
-            self.hide()
             event.ignore()
 
     def keyPressEvent(self, event):
@@ -120,9 +118,10 @@ class MyWindow(QtGui.QWidget):
                                     app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
 
         if reason == QtGui.QSystemTrayIcon.Trigger:
-            tray_menu = QtGui.QMenu(None)
 
-            self.tray_icon.setContextMenu(tray_menu)
+            self.tray_menu.clear()
+
+            self.tray_icon.setContextMenu(self.tray_menu)
             self.tray_icon.setToolTip("TeleDesk")
 
             # self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
@@ -130,23 +129,23 @@ class MyWindow(QtGui.QWidget):
 
             # Title
             self.ui.restore_win = QtGui.QAction("&TeleDesk", self)
-            tray_menu.addAction(self.ui.restore_win)
+            self.tray_menu.addAction(self.ui.restore_win)
             self.ui.restore_win.triggered.connect(self.restore_window_from_menu)
 
-            tray_menu.addSeparator()
+            self.tray_menu.addSeparator()
 
             folder_icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
             computer_icon = QtGui.QIcon(MyWindow.SERVER_ICON)
 
             for stor in self.user_settings.databases:
-                top_list = self.user_settings.get_top_ten_connections(stor["Name"], 32)
+                top_list = self.user_settings.get_top_ten_connections(stor["Name"], 5)
                 if top_list:
-                    node_entry = tray_menu.addAction(stor["Name"])
+                    node_entry = self.tray_menu.addAction(stor["Name"])
                     node_entry.setIcon(folder_icon)
                     for menu_item in top_list:
                         item = self.ds.get_profile_info(stor["Name"], menu_item[0])
                         if item:
-                            entry = tray_menu.addAction(item["NAME"])
+                            entry = self.tray_menu.addAction(item["NAME"])
                             entry.setIcon(computer_icon)
                             self.connect(entry, QtCore.SIGNAL('triggered()'),
                                          lambda menu_it=(stor["Name"], menu_item): self.init_connection_frommenu(
@@ -154,11 +153,11 @@ class MyWindow(QtGui.QWidget):
 
                             # self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
 
-            tray_menu.addSeparator()
+            self.tray_menu.addSeparator()
 
             # Exit
             self.ui.extact = QtGui.QAction("&Exit", self)
-            tray_menu.addAction(self.ui.extact)
+            self.tray_menu.addAction(self.ui.extact)
             self.ui.extact.triggered.connect(QtGui.qApp.quit)
 
             self.tray_icon.contextMenu().popup(QtGui.QCursor.pos())
@@ -178,7 +177,6 @@ class MyWindow(QtGui.QWidget):
             self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
-
 
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(storage, parent)
@@ -506,7 +504,7 @@ class UserSettingsDialog(QtGui.QDialog):
         ftpdatabases = [dict(Name=x["Name"],
                              Type="ftp",
                              Properties=dict(Server=x["Server"],
-                                             Port=x["Port"],
+                                             Port=int(x["Port"]),
                                              FTPUser=x["FTPUser"],
                                              FTPPassword=x["FTPPassword"]),
                              Path=x["Path"],

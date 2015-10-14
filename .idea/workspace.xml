@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4b2a059e-3466-4402-9d52-86debf194107" name="Default" comment="some  refactoring">
-      <change type="DELETED" beforePath="C:\Users\serj\PycharmProjects\TeleDesk\config.db" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\serj\PycharmProjects\TeleDesk\config2.db" afterPath="" />
+    <list default="true" id="4b2a059e-3466-4402-9d52-86debf194107" name="Default" comment="+user settings support">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libs/db/datastorage.py" afterPath="$PROJECT_DIR$/libs/db/datastorage.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libs/core/ftp_updater.py" afterPath="$PROJECT_DIR$/libs/core/ftp_updater.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libs/forms/mainwindow.py" afterPath="$PROJECT_DIR$/libs/forms/mainwindow.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libs/forms/settings.py" afterPath="$PROJECT_DIR$/libs/forms/settings.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/teledesk.pyw" afterPath="$PROJECT_DIR$/teledesk.pyw" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/u_config.cfg" afterPath="$PROJECT_DIR$/u_config.cfg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libs/core/usersettings.py" afterPath="$PROJECT_DIR$/libs/core/usersettings.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="TeleDesk.iws" />
@@ -28,24 +32,120 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="teledesk.pyw" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="teledesk.pyw" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/teledesk.pyw">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.49570817" vertical-offset="0" max-vertical-offset="966">
-              <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3229" max-vertical-offset="4935">
+              <caret line="516" column="27" selection-start-line="516" selection-start-column="27" selection-end-line="516" selection-end-column="27" />
               <folding>
-                <element signature="e#473#13676#0" expanded="false" />
-                <element signature="e#13720#16218#0" expanded="false" />
-                <element signature="e#13768#14752#0" expanded="false" />
-                <element signature="e#14793#15443#0" expanded="false" />
-                <element signature="e#15479#16218#0" expanded="false" />
-                <element signature="e#16263#16961#0" expanded="false" />
-                <element signature="e#16311#16724#0" expanded="false" />
-                <element signature="e#16752#16917#0" expanded="false" />
-                <element signature="e#16949#16961#0" expanded="false" />
-                <element signature="e#17009#17140#0" expanded="false" />
-                <element signature="e#17037#17140#0" expanded="false" />
+                <element signature="e#3201#3543#0" expanded="false" />
+                <element signature="e#3590#3755#0" expanded="false" />
+                <element signature="e#3805#4081#0" expanded="false" />
+                <element signature="e#4139#6472#0" expanded="false" />
+                <element signature="e#6537#7174#0" expanded="false" />
+                <element signature="e#7232#7963#0" expanded="false" />
+                <element signature="e#8001#8395#0" expanded="false" />
+                <element signature="e#8446#9232#0" expanded="false" />
+                <element signature="e#9291#9470#0" expanded="false" />
+                <element signature="e#9535#9661#0" expanded="false" />
+                <element signature="e#9729#10140#0" expanded="false" />
+                <element signature="e#10175#11539#0" expanded="false" />
+                <element signature="e#11577#12151#0" expanded="false" />
+                <element signature="e#12191#12759#0" expanded="false" />
+                <element signature="e#12796#14044#0" expanded="false" />
+                <element signature="e#14088#14267#0" expanded="false" />
+                <element signature="e#14329#14581#0" expanded="false" />
+                <element signature="e#14625#17138#0" expanded="false" />
+                <element signature="e#14673#15672#0" expanded="false" />
+                <element signature="e#15713#16363#0" expanded="false" />
+                <element signature="e#16399#17138#0" expanded="false" />
+                <element signature="e#17183#17893#0" expanded="false" />
+                <element signature="e#17231#17656#0" expanded="false" />
+                <element signature="e#17684#17849#0" expanded="false" />
+                <element signature="e#17881#17893#0" expanded="false" />
+                <element signature="e#22074#22086#0" expanded="false" />
+                <element signature="e#22130#22326#0" expanded="false" />
+                <element signature="e#22373#22561#0" expanded="false" />
+                <element signature="e#22603#22795#0" expanded="false" />
+                <element signature="e#22840#23024#0" expanded="false" />
+                <element signature="e#23065#23432#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ftp_updater.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/core/ftp_updater.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="441" max-vertical-offset="1092">
+              <caret line="35" column="49" selection-start-line="35" selection-start-column="49" selection-end-line="35" selection-end-column="49" />
+              <folding>
+                <element signature="e#18#49#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mainwindow.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/libs/forms/mainwindow.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.6825054" vertical-offset="1826" max-vertical-offset="2919">
+              <caret line="102" column="64" selection-start-line="102" selection-start-column="64" selection-end-line="102" selection-end-column="64" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="datastorage.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/db/datastorage.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="171" max-vertical-offset="2394">
+              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding>
+                <element signature="e#516#1892#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dbconnector.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/db/dbconnector.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="100" max-vertical-offset="1134">
+              <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="settings.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/forms/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="2813" max-vertical-offset="4893">
+              <caret line="197" column="18" selection-start-line="197" selection-start-column="18" selection-end-line="197" selection-end-column="18" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="usersettings.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/core/usersettings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1553" max-vertical-offset="2016">
+              <caret line="25" column="45" selection-start-line="25" selection-start-column="45" selection-end-line="25" selection-end-column="45" />
+              <folding>
+                <element signature="e#24#61#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="serializer.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/libs/core/serializer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1218" max-vertical-offset="3171">
+              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -77,16 +177,45 @@
         <option value="$PROJECT_DIR$/main_window.py" />
         <option value="$PROJECT_DIR$/data_storage.py" />
         <option value="$PROJECT_DIR$/teledesk.py" />
-        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/user_settings_dialog.py" />
+        <option value="$PROJECT_DIR$/libs/forms/newfolder.py" />
+        <option value="$PROJECT_DIR$/libs/forms/itemedit.py" />
+        <option value="$PROJECT_DIR$/libs/forms/quicklaunch.py" />
+        <option value="$PROJECT_DIR$/libs/db/dbconnector.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/libs/db/datastorage.py" />
+        <option value="$PROJECT_DIR$/libs/forms/settings.py" />
         <option value="$PROJECT_DIR$/teledesk.pyw" />
+        <option value="$PROJECT_DIR$/libs/core/ftp_updater.py" />
+        <option value="$PROJECT_DIR$/libs/core/usersettings.py" />
+        <option value="$PROJECT_DIR$/libs/forms/mainwindow.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="1" />
-    <option name="width" value="1280" />
-    <option name="height" value="756" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1296" />
+    <option name="height" value="776" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyBroadExceptionInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -133,13 +262,95 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="libs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="libs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="forms" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="libs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="db" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TeleDesk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="libs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/user_settings.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/core/ftp_updater.py" />
     <property name="restartRequiresConfirmation" value="true" />
     <property name="options.lastSelected" value="vcs.Git" />
     <property name="options.splitter.main.proportions" value="0.3" />
@@ -327,12 +538,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="C:\Python27\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/libs/core" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="TeleDesk" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/user_settings.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/libs/core/usersettings.py" />
       <option name="PARAMETERS" value="" />
       <RunnerSettings RunnerId="PyDebugRunner" />
       <RunnerSettings RunnerId="PythonRunner" />
@@ -340,10 +551,29 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <list size="3">
+    <configuration default="false" name="ftp" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Python27\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/libs/core" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TeleDesk" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/libs/core/ftp_updater.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Python.Teledesk" />
       <item index="1" class="java.lang.String" itemvalue="Python.Test" />
       <item index="2" class="java.lang.String" itemvalue="Python.Usersettings" />
+      <item index="3" class="java.lang.String" itemvalue="Python.ftp" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -388,31 +618,59 @@
       <created>1444157817734</created>
       <updated>1444157817734</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="some  refactoring">
+      <created>1444160748733</created>
+      <updated>1444160748733</updated>
+    </task>
+    <task id="LOCAL-00010" summary="some  refactoring">
+      <created>1444245628997</created>
+      <updated>1444245628997</updated>
+    </task>
+    <task id="LOCAL-00011" summary="+user settings support">
+      <created>1444583101727</created>
+      <updated>1444583101727</updated>
+    </task>
+    <task id="LOCAL-00012" summary="+user settings support">
+      <created>1444584176243</created>
+      <updated>1444584176243</updated>
+    </task>
+    <task id="LOCAL-00013" summary="+user settings bugfix">
+      <created>1444645668911</created>
+      <updated>1444645668911</updated>
+    </task>
+    <task id="LOCAL-00014" summary="+refresh + reset to defaults">
+      <created>1444652148999</created>
+      <updated>1444652148999</updated>
+    </task>
+    <task id="LOCAL-00015" summary="+ftp support">
+      <created>1444764888062</created>
+      <updated>1444764888062</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="1" width="1280" height="756" extended-state="0" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1296" height="776" extended-state="6" />
+    <editor active="false" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32868218" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16586152" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2263566" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1645469" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.26666668" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.16434109" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1888" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22827938" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2387597" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -458,17 +716,398 @@
     <MESSAGE value="New UI + user_settinga_dialog + some refs" />
     <MESSAGE value="some refs" />
     <MESSAGE value="structure refactoring" />
-    <option name="LAST_COMMIT_MESSAGE" value="structure refactoring" />
+    <MESSAGE value="some  refactoring" />
+    <MESSAGE value="+user settings support" />
+    <MESSAGE value="+user settings bugfix" />
+    <MESSAGE value="+refresh + reset to defaults" />
+    <MESSAGE value="+ftp support" />
+    <option name="LAST_COMMIT_MESSAGE" value="+ftp support" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="158" />
+      <option name="time" value="283" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="673" max-vertical-offset="3402">
+          <caret line="179" column="0" selection-start-line="179" selection-start-column="0" selection-end-line="179" selection-end-column="0" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/ftp_updater.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="399" max-vertical-offset="966">
+          <caret line="19" column="51" selection-start-line="19" selection-start-column="51" selection-end-line="19" selection-end-column="51" />
+          <folding>
+            <element signature="e#18#49#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/mainwindow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="667" max-vertical-offset="2919">
+          <caret line="40" column="27" selection-start-line="40" selection-start-column="13" selection-end-line="40" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/datastorage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="2814" max-vertical-offset="2982">
+          <caret line="134" column="0" selection-start-line="134" selection-start-column="0" selection-end-line="135" selection-end-column="8" />
+          <folding>
+            <element signature="e#516#1892#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/dbconnector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="100" max-vertical-offset="1134">
+          <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3927" max-vertical-offset="4851">
+          <caret line="187" column="0" selection-start-line="187" selection-start-column="0" selection-end-line="187" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/usersettings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="336" max-vertical-offset="1911">
+          <caret line="16" column="25" selection-start-line="16" selection-start-column="8" selection-end-line="16" selection-end-column="25" />
+          <folding>
+            <element signature="e#24#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1491">
+          <caret line="37" column="44" selection-start-line="37" selection-start-column="33" selection-end-line="37" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#31#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="42" max-vertical-offset="4872">
+          <caret line="2" column="9" selection-start-line="2" selection-start-column="9" selection-end-line="2" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="9093">
+          <caret line="21" column="33" selection-start-line="21" selection-start-column="33" selection-end-line="21" selection-end-column="33" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/usersettings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="441" max-vertical-offset="1638">
+          <caret line="21" column="83" selection-start-line="21" selection-start-column="20" selection-end-line="21" selection-end-column="83" />
+          <folding>
+            <element signature="e#24#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/dbconnector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1092">
+          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3213" max-vertical-offset="4662">
+          <caret line="153" column="19" selection-start-line="153" selection-start-column="13" selection-end-line="153" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="8394" max-vertical-offset="8904">
+          <caret line="469" column="4" selection-start-line="469" selection-start-column="4" selection-end-line="469" selection-end-column="4" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/usersettings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1261" max-vertical-offset="1638">
+          <caret line="72" column="0" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+          <folding>
+            <element signature="e#24#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="9219">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="34" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="693" max-vertical-offset="1197">
+          <caret line="93" column="20" selection-start-line="93" selection-start-column="20" selection-end-line="93" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#31#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="9093" max-vertical-offset="9219">
+          <caret line="433" column="0" selection-start-line="433" selection-start-column="0" selection-end-line="433" selection-end-column="0" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/datastorage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="2415">
+          <caret line="15" column="18" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
+          <folding>
+            <element signature="e#516#1892#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/dbconnector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="84" max-vertical-offset="1092">
+          <caret line="4" column="21" selection-start-line="4" selection-start-column="21" selection-end-line="4" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teledesk.pyw">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="336" max-vertical-offset="966">
+          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding>
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$USER_HOME$/.PyCharm30/system/python_stubs/-762174762/__builtin__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33225283" vertical-offset="51854" max-vertical-offset="108423">
@@ -487,13 +1126,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3325301" vertical-offset="5973" max-vertical-offset="9807">
           <caret line="297" column="0" selection-start-line="297" selection-start-column="0" selection-end-line="297" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd_breakpoints.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33333334" vertical-offset="1840" max-vertical-offset="4200">
-          <caret line="97" column="0" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -525,23 +1157,136 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/newfolder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="126" max-vertical-offset="1512">
+          <caret line="25" column="23" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/itemedit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7875" vertical-offset="0" max-vertical-offset="2541">
+          <caret line="18" column="22" selection-start-line="18" selection-start-column="6" selection-end-line="18" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd_breakpoints.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334" vertical-offset="1853" max-vertical-offset="4200">
+          <caret line="98" column="0" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6363636" vertical-offset="0" max-vertical-offset="546">
+          <caret line="15" column="37" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#31#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/serializer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1218" max-vertical-offset="3171">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/datastorage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="171" max-vertical-offset="2394">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding>
+            <element signature="e#516#1892#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/db/dbconnector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="100" max-vertical-offset="1134">
+          <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/ftp_updater.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="441" max-vertical-offset="1092">
+          <caret line="35" column="49" selection-start-line="35" selection-start-column="49" selection-end-line="35" selection-end-column="49" />
+          <folding>
+            <element signature="e#18#49#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3695" max-vertical-offset="4893">
+          <caret line="197" column="18" selection-start-line="197" selection-start-column="18" selection-end-line="197" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/core/usersettings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1553" max-vertical-offset="2016">
+          <caret line="25" column="45" selection-start-line="25" selection-start-column="45" selection-end-line="25" selection-end-column="45" />
+          <folding>
+            <element signature="e#24#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/teledesk.pyw">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.49570817" vertical-offset="0" max-vertical-offset="966">
-          <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="3229" max-vertical-offset="4935">
+          <caret line="516" column="27" selection-start-line="516" selection-start-column="27" selection-end-line="516" selection-end-column="27" />
           <folding>
-            <element signature="e#473#13676#0" expanded="false" />
-            <element signature="e#13720#16218#0" expanded="false" />
-            <element signature="e#13768#14752#0" expanded="false" />
-            <element signature="e#14793#15443#0" expanded="false" />
-            <element signature="e#15479#16218#0" expanded="false" />
-            <element signature="e#16263#16961#0" expanded="false" />
-            <element signature="e#16311#16724#0" expanded="false" />
-            <element signature="e#16752#16917#0" expanded="false" />
-            <element signature="e#16949#16961#0" expanded="false" />
-            <element signature="e#17009#17140#0" expanded="false" />
-            <element signature="e#17037#17140#0" expanded="false" />
+            <element signature="e#3201#3543#0" expanded="false" />
+            <element signature="e#3590#3755#0" expanded="false" />
+            <element signature="e#3805#4081#0" expanded="false" />
+            <element signature="e#4139#6472#0" expanded="false" />
+            <element signature="e#6537#7174#0" expanded="false" />
+            <element signature="e#7232#7963#0" expanded="false" />
+            <element signature="e#8001#8395#0" expanded="false" />
+            <element signature="e#8446#9232#0" expanded="false" />
+            <element signature="e#9291#9470#0" expanded="false" />
+            <element signature="e#9535#9661#0" expanded="false" />
+            <element signature="e#9729#10140#0" expanded="false" />
+            <element signature="e#10175#11539#0" expanded="false" />
+            <element signature="e#11577#12151#0" expanded="false" />
+            <element signature="e#12191#12759#0" expanded="false" />
+            <element signature="e#12796#14044#0" expanded="false" />
+            <element signature="e#14088#14267#0" expanded="false" />
+            <element signature="e#14329#14581#0" expanded="false" />
+            <element signature="e#14625#17138#0" expanded="false" />
+            <element signature="e#14673#15672#0" expanded="false" />
+            <element signature="e#15713#16363#0" expanded="false" />
+            <element signature="e#16399#17138#0" expanded="false" />
+            <element signature="e#17183#17893#0" expanded="false" />
+            <element signature="e#17231#17656#0" expanded="false" />
+            <element signature="e#17684#17849#0" expanded="false" />
+            <element signature="e#17881#17893#0" expanded="false" />
+            <element signature="e#22074#22086#0" expanded="false" />
+            <element signature="e#22130#22326#0" expanded="false" />
+            <element signature="e#22373#22561#0" expanded="false" />
+            <element signature="e#22603#22795#0" expanded="false" />
+            <element signature="e#22840#23024#0" expanded="false" />
+            <element signature="e#23065#23432#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/forms/mainwindow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6825054" vertical-offset="1826" max-vertical-offset="2919">
+          <caret line="102" column="64" selection-start-line="102" selection-start-column="64" selection-end-line="102" selection-end-column="64" />
+          <folding />
         </state>
       </provider>
     </entry>

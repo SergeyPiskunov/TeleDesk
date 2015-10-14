@@ -182,6 +182,8 @@ class SettingsTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             self.databases[row][self.databases[row].keys()[column]] = unicode(value.toPyObject())
+            if column == 0:
+               self.databases[row][self.databases[row].keys()[1]] = unicode(value.toPyObject()).lower()+'.db'
             self.dataChanged.emit(index, index)
             return True
         return False

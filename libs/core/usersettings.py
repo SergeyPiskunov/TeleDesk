@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from contextlib import contextmanager
 import pickle
 
 
@@ -14,15 +15,15 @@ class UserSettings(object):
         self.databases = {}
         self.top_ten_connections = {}
 
-    def reset_to_dafaults(self, config_file = None):
+    def reset_to_dafaults(self, config_file=None):
         """ Writes default settings to the self.config_file """
         self.master_login = 'root'
         self.master_password = 'toor'
         self.ui_language = 'en'
         self.top_ten_connections = {}
-        self.databases = [{"Name": "Local_storage",
+        self.databases = [{"Name": "local",
                            "Type": "local",
-                           "Path": "config.db",
+                           "Path": "local.db",
                            "User": "",
                            "Password": "",
                            "Properties": {}}]
@@ -30,13 +31,17 @@ class UserSettings(object):
 
     def load_config(self):
         """ Loads all user settings from the self.config_file """
-        with open(self.config_file, 'rb') as cfg_file:
-            config = pickle.load(cfg_file)
-            self.master_login = config['master_login']
-            self.master_password = config['master_password']
-            self.ui_language = config['ui_language']
-            self.databases = config['databases']
-            self.top_ten_connections = config['top_ten_connections']
+        try:
+            with open(self.config_file, 'rb') as cfg_file:
+                config = pickle.load(cfg_file)
+                self.master_login = config['master_login']
+                self.master_password = config['master_password']
+                self.ui_language = config['ui_language']
+                self.databases = config['databases']
+                self.top_ten_connections = config['top_ten_connections']
+        except IOError:
+            self.reset_to_dafaults()
+            self.load_config()
 
     def save_config(self):
         """ Saves all user settings in the self.config_file """
@@ -73,8 +78,8 @@ class UserSettings(object):
             if items > len(top_list):
                 items = len(top_list)
             for i in range(items):
-                result.append(top_list[i][0])
-            return top_list
+                result.append(top_list[i])
+            return result
         else:
             return None
 

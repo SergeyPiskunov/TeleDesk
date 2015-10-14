@@ -38,7 +38,7 @@ class MainWindowUi(object):
         self.gridLayout.addWidget(self.mainMenu, 1, 0, 1, 4)
 
         #settings
-        self.settingsAction = QtGui.QAction('&Settings', MyWin)
+        self.settingsAction = QtGui.QAction("&Settings", MyWin)
         importRdpAction = QtGui.QAction('&Import from *.rdp file', MyWin)
 
         #re-read databases
@@ -100,7 +100,7 @@ class MainWindowUi(object):
         QtCore.QMetaObject.connectSlotsByName(MyWin)
 
     def retranslateUi(self, MyWin):
-        MyWin.setWindowTitle(_translate("MyWin", "TeleDesk v0.1", None))
+        MyWin.setWindowTitle(_translate("MyWin", "TeleDesk v1.0a", None))
 
     def openMenu(self, position):
 

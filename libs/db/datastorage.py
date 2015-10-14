@@ -46,7 +46,6 @@ class DataStorage():
                 database.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
                                  "NULL,'" + db["Name"] + "', NULL)")
 
-
     def get_folders_children(self, database, parameters=None):
         source = self.data_bases.get(database)
         return source.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parameters, True)
