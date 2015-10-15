@@ -4,7 +4,7 @@ import pickle
 
 class UserSettings(object):
     """ Initializing with path to user settings file.
-    Allow to load and save user settings via pickle """
+    Allow to load and save user settings via pickle  """
 
     def __init__(self, config_file='u_config.cfg'):
         self.config_file = config_file

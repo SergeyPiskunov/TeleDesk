@@ -4,7 +4,7 @@ from dbconnector import DBConnector
 
 class DataBase(DBConnector):
     """ Keeps an instance of a database
-    and it's name, path, type [local or shared]"""
+    and it's name, path, type [local or shared] """
 
     def __init__(self, **kwargs):
         DBConnector.__init__(self, kwargs['Path'])

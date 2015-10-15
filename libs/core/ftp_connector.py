@@ -6,7 +6,7 @@ from contextlib import closing
 
 class FTPConnector(object):
     """ Object handles main FTP operations
-        after any operation returns dict [is success, message] """
+        after any operation returns dict [is success, message]  """
 
     def __init__(self, ftp_params):
         self.host = ftp_params['FTP_Server']

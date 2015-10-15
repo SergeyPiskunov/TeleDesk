@@ -41,7 +41,7 @@ class MyWindow(QtGui.QWidget):
         # tree view
         self.show_connections_tree(True)
 
-        #updater for all nonlocal databases
+        #updater for all nonlocal  databases
         self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
         self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
                      self.show_msg, QtCore.Qt.QueuedConnection)
