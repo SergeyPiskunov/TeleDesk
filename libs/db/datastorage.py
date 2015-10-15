@@ -33,8 +33,6 @@ class DataStorage():
 
                 database.execute("CREATE TABLE `PROFILES` ("
                                  "`ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
-                                 "`Namee` TEXT,"
-                                 "`Aliass` TEXT,"
                                  "`Rating` INTEGER,"
                                  "`Server` TEXT,"
                                  "`Port` TEXT,"

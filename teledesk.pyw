@@ -13,8 +13,8 @@ from libs.forms import newfolder
 from libs.forms import itemedit
 
 from libs.core import serializer
-from libs.core import usersettings
-from libs.core import ftp_updater
+from libs.core import user_settings
+from libs.core import db_updater
 
 
 class MyWindow(QtGui.QWidget):
@@ -29,7 +29,7 @@ class MyWindow(QtGui.QWidget):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__()
         # loading user settings
-        self.user_settings = usersettings.UserSettings()
+        self.user_settings = user_settings.UserSettings()
         self.user_settings.load_config()
 
         # GUI
@@ -41,14 +41,13 @@ class MyWindow(QtGui.QWidget):
         # tree view
         self.show_connections_tree(True)
 
-        for stor in self.user_settings.databases:
-            if stor["Type"] == 'ftp':
-                self.ftp_update = ftp_updater.FTPUpdater(self.ui, stor, None)
-                self.connect(self.ftp_update, QtCore.SIGNAL("show_connections_tree()"),
-                             self.show_connections_tree, QtCore.Qt.QueuedConnection)
-                self.connect(self.ftp_update, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
-                             self.show_msg, QtCore.Qt.QueuedConnection)
-                self.ftp_update.update()
+        #updater for all nonlocal databases
+        self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
+                     self.show_msg, QtCore.Qt.QueuedConnection)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
+                     self.show_connections_tree, QtCore.Qt.QueuedConnection)
+        self.dbupdater.update()
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -247,7 +246,7 @@ class MyWindow(QtGui.QWidget):
             te = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["NAME"] + ".rdp")
             if te:
                 os.startfile(item["NAME"] + ".rdp")
-                time.sleep(3)
+                time.sleep(5)
                 os.remove(item["NAME"] + ".rdp")
 
     def edit_item(self):
@@ -433,6 +432,7 @@ class NewFolderDialog(QtGui.QDialog):
 
 
 class UserSettingsDialog(QtGui.QDialog):
+
     def __init__(self, usersett):
         from collections import OrderedDict
 
@@ -449,13 +449,13 @@ class UserSettingsDialog(QtGui.QDialog):
                                               ("Password", "")])
 
         ftpdatabases_columns = OrderedDict([("Name", ""),
-                                                    ("Path", ""),
-                                                    ("Server", ""),
-                                                    ("Port", ""),
-                                                    ("FTPUser", ""),
-                                                    ("FTPPassword", ""),
-                                                    ("User", ""),
-                                                    ("Password", "")])
+                                            ("Path", ""),
+                                            ("User", ""),
+                                            ("Password", ""),
+                                            ("FTP_Server", ""),
+                                            ("FTP_Port", ""),
+                                            ("FTP_User", ""),
+                                            ("FTP_Password", "")])
         localdatabases = []
         for x in self.usersett.databases:
             if x["Type"] == "local":
@@ -472,12 +472,13 @@ class UserSettingsDialog(QtGui.QDialog):
             if x["Type"] == "ftp":
                 d = OrderedDict([("Name", x["Name"]),
                                  ("Path", x["Path"]),
-                                 ("FTPUser", x["Properties"]["FTPUser"]),
-                                 ("FTPPassword", x["Properties"]["FTPPassword"]),
                                  ("User", x["User"]),
                                  ("Password", x["Password"]),
-                                 ("Server", x["Properties"]["Server"]),
-                                 ("Port", x["Properties"]["Port"])])
+                                 ("FTP_Server", x["Properties"]["FTP_Server"]),
+                                 ("FTP_Port", x["Properties"]["FTP_Port"]),
+                                 ("FTP_User", x["Properties"]["FTP_User"]),
+                                 ("FTP_Password", x["Properties"]["FTP_Password"])])
+
                 ftpdatabases.append(d)
 
         self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(ftpdatabases, ftpdatabases_columns))
@@ -503,10 +504,10 @@ class UserSettingsDialog(QtGui.QDialog):
 
         ftpdatabases = [dict(Name=x["Name"],
                              Type="ftp",
-                             Properties=dict(Server=x["Server"],
-                                             Port=int(x["Port"]),
-                                             FTPUser=x["FTPUser"],
-                                             FTPPassword=x["FTPPassword"]),
+                             Properties=dict(FTP_Server=x["FTP_Server"],
+                                             FTP_Port=int(x["FTP_Port"]),
+                                             FTP_User=x["FTP_User"],
+                                             FTP_Password=x["FTP_Password"]),
                              Path=x["Path"],
                              User=x["User"],
                              Password=x["Password"])
@@ -552,15 +553,7 @@ if __name__ == "__main__":
     import sys
 
     app = QtGui.QApplication(sys.argv)
-
-    # app.setStyle("Windows")
-    # app.setStyle("WindowsXP")
-    # app.setStyle("WindowsVista")
-    # app.setStyle("Motif")
-    # app.setStyle("CDE")
     app.setStyle("Plastique")
-    # app.setStyle("Cleanlooks")
-
     window = MyWindow()
     window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                               app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))

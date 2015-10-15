@@ -1,6 +1,4 @@
-import win32crypt
-import binascii
-
+# -*- coding: utf-8 -*-
 
 class Serializer:
 
@@ -44,15 +42,7 @@ class Serializer:
 
 
 if __name__ == "__main__":
-
-    from data_storage import DataStorage
-    so = {"Name": "Local_storage", "Type": "local", "Path": "config.db"}
-    sources = [so]
-    ds = DataStorage(sources)
-    item = ds.get_profile_info("Local_storage", "87")
-    if item.__len__():
-        text_to_write = Serializer().serialize_to_text_win_rdp(item[0], "7.1")
-        print text_to_write
+    pass
 
 
 """
