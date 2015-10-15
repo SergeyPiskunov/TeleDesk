@@ -15,12 +15,13 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 ###### Done:
 
 - core
-- main window UI
-- quicklaunch window UI
+- main window UI/logic
+- quicklaunch window UI/logic
+- user settings window UI/logic
+- database sharing via FTP
 
 ###### To do:
 
 - database encryption
-- database sharing via FTP
 - import/export to *.rdp
 - multilanguage UI
