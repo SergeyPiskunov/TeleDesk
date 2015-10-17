@@ -20,7 +20,6 @@ class DBUpdater(QtCore.QThread):
                 FTPConnector = ftp_connector.FTPConnector(database["Properties"])
                 result = FTPConnector.download(database["Path"], database["Path"])
                 if result["success"]:
-                    #self.emit(QtCore.SIGNAL("show_msg(PyQt_PyObject)"), result["message"])
                     self.emit(QtCore.SIGNAL("show_connections_tree()"), )
                 else:
                     self.emit(QtCore.SIGNAL("show_msg(PyQt_PyObject)"), result["message"])

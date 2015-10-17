@@ -42,12 +42,12 @@ class MyWindow(QtGui.QWidget):
         self.show_connections_tree(True)
 
         #updater for all nonlocal  databases
-        self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
-        self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
-                     self.show_msg, QtCore.Qt.QueuedConnection)
-        self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
-                     self.show_connections_tree, QtCore.Qt.QueuedConnection)
-        self.dbupdater.update()
+        #self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
+        #self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
+        #             self.show_msg, QtCore.Qt.QueuedConnection)
+        #self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
+        #             self.show_connections_tree, QtCore.Qt.QueuedConnection)
+        #self.dbupdater.update()
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -178,16 +178,16 @@ class MyWindow(QtGui.QWidget):
             self.ui.treeView.expand(model.indexFromItem(root))
 
     def fill_tree(self, storage, parent, root):
-        cildlist = self.ds.get_folders_children(storage, parent)
+        cildlist = self.ds.get_folders_children(**dict(database=storage, parent = parent))
 
         for chld in cildlist:
-            child_node = QtGui.QStandardItem(unicode(chld["NAME"]))
+            child_node = QtGui.QStandardItem(chld["Name"])
             child_node.setData(QtCore.QVariant(unicode(chld["ID"])))
 
             # icon = QtGui.QIcon()
-            if str(chld["PROFILE"]) == u'':
+            if str(chld["Profile"]) == u'':
                 icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
-            elif str(chld["PROFILE"]):
+            elif str(chld["Profile"]):
                 icon = QtGui.QIcon(MyWindow.SERVER_ICON)
             else:
                 pass
@@ -215,13 +215,13 @@ class MyWindow(QtGui.QWidget):
         storage_name = self.get_storage_name(index)
 
         if selected_id:
-            item = self.ds.get_profile_info(storage_name, selected_id)
+            item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
 
             if item.__len__():
-                name = unicode(item["NAME"])
-                server = unicode(item["SERVER"])
-                port = str(item["PORT"])
-                user = unicode(item["USER"])
+                name = unicode(item["Name"])
+                server = unicode(item["Server"])
+                port = str(item["Port"])
+                user = unicode(item["User"])
                 self.ui.labelStatus.setText(" Name - " + name + "\n"
                                             + " Server - " + server + "\n"
                                             + " Port - " + port + "\n"
@@ -254,9 +254,9 @@ class MyWindow(QtGui.QWidget):
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
 
-        item = self.ds.get_profile_info(storage_name, selected_id)
+        item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
         if item.__len__():
-            input_dialog = ItemEditDialog(self.ds,
+            input_dialog = itemedit.ItemEditDialog(self.ds,
                                           {"Storage": storage_name,
                                            "Parent": None,
                                            "ItemData": item,
@@ -265,13 +265,13 @@ class MyWindow(QtGui.QWidget):
             input_dialog.exec_()
             self.update_tree()
 
-            item = self.ds.get_profile_info(storage_name, selected_id)
+            item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
 
             if item.__len__():
-                name = unicode(item["NAME"])
-                server = unicode(item["SERVER"])
-                port = str(item["PORT"])
-                user = unicode(item["USER"])
+                name = unicode(item["Name"])
+                server = unicode(item["Server"])
+                port = str(item["Port"])
+                user = unicode(item["User"])
                 self.ui.labelStatus.setText(" Name - " + name + "\n"
                                             + " Server - " + server + "\n"
                                             + " Port - " + port + "\n"
@@ -283,11 +283,11 @@ class MyWindow(QtGui.QWidget):
         index = self.ui.treeView.selectedIndexes()[0]
         selected_name = unicode(index.model().itemFromIndex(index).text())
         storage_name = str(index.model().itemFromIndex(index).parent().text())
-        item = self.ds.get_folder_id(storage_name, selected_name)
+        item = self.ds.get_folder_id(**dict(database=storage_name, Name=selected_name))
 
-        if item.__len__():
+        if item:
             item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddItem"}
-            input_dialog = ItemEditDialog(self.ds, item_data)
+            input_dialog = itemedit.ItemEditDialog(self.ds, item_data)
             input_dialog.exec_()
             if input_dialog.updated:
                 self.update_tree()
@@ -301,7 +301,7 @@ class MyWindow(QtGui.QWidget):
         # if item.__len__():
         if 1 == 1:
             item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
-            inputter = NewFolderDialog(self.ds, item_data)
+            inputter = newfolder.NewFolderDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
                 self.update_tree()
@@ -329,7 +329,7 @@ class MyWindow(QtGui.QWidget):
             self.update_tree()
 
     def show_user_settings(self):
-        settings_dialog = UserSettingsDialog(self.user_settings)
+        settings_dialog = settings.UserSettingsDialog(self.user_settings)
         # settings_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
         settings_dialog.exec_()
 
@@ -344,210 +344,6 @@ class MyWindow(QtGui.QWidget):
             item = item.parent()
         return storage_name
 
-
-class ItemEditDialog(QtGui.QDialog):
-    def __init__(self, ds, item_data=None):
-        self.ds = ds
-        self.storage_name = item_data["Storage"]
-        self.updated = False
-        self.parent = item_data["Parent"]
-        QtGui.QWidget.__init__(self, None)
-        self.ui = itemedit.ItemEditWindowUi()
-        self.ui.setupUi(self)
-        if item_data["Mode"] == "Edit":
-            self.item_to_edit = item_data["ItemData"]["ID"]
-            self.ui.lineEditName.setText(item_data["ItemData"]["NAME"])
-            self.ui.lineEditServer.setText(item_data["ItemData"]["SERVER"])
-            self.ui.lineEditPort.setText(item_data["ItemData"]["PORT"])
-            self.ui.lineEditUser.setText(item_data["ItemData"]["USER"])
-            self.ui.lineEditDomain.setText(item_data["ItemData"]["DOMAIN"])
-            self.ui.pushButtonSave.clicked.connect(self.edit_item)
-        elif item_data["Mode"] == "AddItem":
-            # self.ui.lineEditName.setText(item_data["Parent"])
-            self.ui.pushButtonSave.clicked.connect(self.create_new_item)
-        else:
-            pass
-
-    def create_new_item(self):
-        pwdHash = win32crypt.CryptProtectData(str(self.ui.lineEditPassword.text()), u'psw', None, None, None, 0)
-        password = binascii.hexlify(pwdHash)
-
-        self.ds.create_new_profile(**{
-            'parent': self.parent,
-            'storage_name': self.storage_name,
-            'name': unicode(self.ui.lineEditName.text()),
-            'server': unicode(self.ui.lineEditServer.text()),
-            'domain': unicode(self.ui.lineEditDomain.text()),
-            'user': unicode(self.ui.lineEditUser.text()),
-            'password': password,
-            'port': str(self.ui.lineEditPort.text())})
-
-        self.updated = True
-        self.close()
-
-    def edit_item(self):
-
-        password = self.ui.lineEditPassword.text()
-
-        if password != u'':
-            pwdHash = win32crypt.CryptProtectData(unicode(password), u'psw', None, None, None, 0)
-            password = binascii.hexlify(pwdHash)
-        else:
-            password = ''
-
-        self.ds.update_profile(**{
-            'item_to_edit': self.item_to_edit,
-            'storage_name': self.storage_name,
-            'name': unicode(self.ui.lineEditName.text()),
-            'server': unicode(self.ui.lineEditServer.text()),
-            'domain': unicode(self.ui.lineEditDomain.text()),
-            'user': unicode(self.ui.lineEditUser.text()),
-            'password': password,
-            'port': str(self.ui.lineEditPort.text())})
-
-        self.close()
-
-
-class NewFolderDialog(QtGui.QDialog):
-    def __init__(self, ds, item_data=None):
-        self.updated = False
-        self.ds = ds
-        self.storage = item_data["Storage"]
-        self.parent = item_data["Parent"]
-        QtGui.QWidget.__init__(self, None)
-        self.ui = newfolder.NewFolderWindowUi()
-        self.ui.setupUi(self)
-        self.ui.pushButtonOk.clicked.connect(self.ok)
-        self.ui.pushButtonCancel.clicked.connect(self.cancel)
-        self.ui.labelParentName.setText("Enter folder name")
-
-    def ok(self):
-        name = unicode(self.ui.lineEditFolderName.text())
-        self.ds.create_new_folder(self.storage, self.parent, name)
-        self.updated = True
-        self.close()
-
-    def cancel(self):
-        self.close()
-
-
-class UserSettingsDialog(QtGui.QDialog):
-
-    def __init__(self, usersett):
-        from collections import OrderedDict
-
-        QtGui.QWidget.__init__(self, None)
-        self.ui = settings.SettingsWindowUi()
-        self.ui.setupUi(self)
-        self.usersett = usersett
-
-        # dividing list of databases into local and FTP databases
-        # to display them in separate tables
-        localdatabases_columns = OrderedDict([("Name", ""),
-                                              ("Path", ""),
-                                              ("User", ""),
-                                              ("Password", "")])
-
-        ftpdatabases_columns = OrderedDict([("Name", ""),
-                                            ("Path", ""),
-                                            ("User", ""),
-                                            ("Password", ""),
-                                            ("FTP_Server", ""),
-                                            ("FTP_Port", ""),
-                                            ("FTP_User", ""),
-                                            ("FTP_Password", "")])
-        localdatabases = []
-        for x in self.usersett.databases:
-            if x["Type"] == "local":
-                d = OrderedDict([("Name", x["Name"]),
-                                 ("Path", x["Path"]),
-                                 ("User", x["User"]),
-                                 ("Password", x["Password"])])
-                localdatabases.append(d)
-
-        self.ui.localStorageTableView.setModel(settings.SettingsTableModel(localdatabases, localdatabases_columns))
-
-        ftpdatabases = []
-        for x in self.usersett.databases:
-            if x["Type"] == "ftp":
-                d = OrderedDict([("Name", x["Name"]),
-                                 ("Path", x["Path"]),
-                                 ("User", x["User"]),
-                                 ("Password", x["Password"]),
-                                 ("FTP_Server", x["Properties"]["FTP_Server"]),
-                                 ("FTP_Port", x["Properties"]["FTP_Port"]),
-                                 ("FTP_User", x["Properties"]["FTP_User"]),
-                                 ("FTP_Password", x["Properties"]["FTP_Password"])])
-
-                ftpdatabases.append(d)
-
-        self.ui.FTPStorageTableView.setModel(settings.SettingsTableModel(ftpdatabases, ftpdatabases_columns))
-
-        self.ui.OKButton.clicked.connect(self.save)
-        self.ui.CancelButton.clicked.connect(self.cancel)
-        self.ui.deleteLocalStorageButton.clicked.connect(self.removeLocalStorageRow)
-        self.ui.addLocalStorageButton.clicked.connect(self.addLocalStorageRow)
-        self.ui.deleteFTPStorageButton.clicked.connect(self.removeFTPStorageRow)
-        self.ui.addFTPStorageButton.clicked.connect(self.addFTPStorageRow)
-        self.ui.resetButton.clicked.connect(self.resetToDefaults)
-
-    def save(self):
-        self.usersett.databases = self.ui.localStorageTableView.model().databases
-        self.usersett.databases = []
-        localdatabases = [dict(Name=x["Name"],
-                               Type="local",
-                               Properties={},
-                               Path=x["Path"],
-                               User=x["User"],
-                               Password=x["Password"])
-                          for x in self.ui.localStorageTableView.model().databases]
-
-        ftpdatabases = [dict(Name=x["Name"],
-                             Type="ftp",
-                             Properties=dict(FTP_Server=x["FTP_Server"],
-                                             FTP_Port=int(x["FTP_Port"]),
-                                             FTP_User=x["FTP_User"],
-                                             FTP_Password=x["FTP_Password"]),
-                             Path=x["Path"],
-                             User=x["User"],
-                             Password=x["Password"])
-                        for x in self.ui.FTPStorageTableView.model().databases]
-
-        self.usersett.databases = localdatabases + ftpdatabases
-
-        self.usersett.save_config()
-        self.close()
-
-    def cancel(self):
-        self.close()
-
-    def addLocalStorageRow(self):
-        selected_index = self.ui.localStorageTableView.model().index(len(self.usersett.databases), 0)
-
-        self.ui.localStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
-
-    def removeLocalStorageRow(self):
-        selected_index = self.ui.localStorageTableView.selectionModel().selectedIndexes()[0]
-
-        self.ui.localStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
-
-    def addFTPStorageRow(self):
-        selected_index = self.ui.FTPStorageTableView.model().index(len(self.usersett.databases), 0)
-
-        self.ui.FTPStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
-
-    def removeFTPStorageRow(self):
-        selected_index = self.ui.FTPStorageTableView.selectionModel().selectedIndexes()[0]
-
-        self.ui.FTPStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
-
-    def resetToDefaults(self):
-        reply = QtGui.QMessageBox.question(self, 'Message', "Do ypu want to reset config?",
-                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                                   QtGui.QMessageBox.No)
-        if reply == QtGui.QMessageBox.Yes:
-            self.usersett.reset_to_dafaults()
-            self.close()
 
 if __name__ == "__main__":
     import sys

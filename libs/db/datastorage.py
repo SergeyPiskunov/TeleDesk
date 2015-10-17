@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from dbconnector import DBConnector
+from libs.third_parity import pyaes
 
 
 class DataBase(DBConnector):
@@ -11,6 +12,16 @@ class DataBase(DBConnector):
         self.name = kwargs['Name']
         self.type = kwargs['Type']
         self.path = kwargs['Path']
+        if kwargs['Password'] != u'':
+            key = kwargs['Password']
+            if len(key) > 16:
+                key = key[:16]
+            if len(key) < 16:
+                i = 0
+                while len(key) < 16:
+                    key = key + key[i]
+                    i = i + 1
+            self.password = key
 
 
 class DataStorage():
@@ -19,10 +30,11 @@ class DataStorage():
 
     def __init__(self, data_sources):
         self.data_bases = {}
+        self.crypted_fields = ['Name', 'Server', 'User', 'Password']
         for db in data_sources:
             database = DataBase(**db)
             self.data_bases[db["Name"]] = database
-            #if the database is blank create all necessary tables
+            # if the database is blank create all necessary tables
             tables = database.get_data("SELECT name FROM sqlite_master")
             if not tables:
                 database.execute("CREATE TABLE `FOLDERS` ("
@@ -38,32 +50,73 @@ class DataStorage():
                                  "`Port` TEXT,"
                                  "`User` TEXT,"
                                  "`Domain` TEXT,"
-                                 "`Password` TEXT,"
-                                 "`Folder` INTEGER);")
+                                 "`Password` TEXT)")
 
                 database.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
                                  "NULL,'" + db["Name"] + "', NULL)")
 
-    def get_folders_children(self, database, parameters=None):
-        source = self.data_bases.get(database)
-        return source.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", parameters, True)
+    def encrypted(iput_func):
+        def encryption_wrapper(self, **kwargs):
+            source = self.data_bases.get(kwargs['database'])
+            if hasattr(source, 'password') and source.password != u'':
+                for fieldname in self.crypted_fields:
+                    if kwargs.has_key(fieldname):
+                        aes = pyaes.AESModeOfOperationCTR(source.password)
+                        val = aes.encrypt(kwargs[fieldname].encode("utf8"))
+                        #val = val.replace("'", bytes(10101011))
+                        kwargs[fieldname] = val
 
-    def get_profile_info(self, database, parameters=None):
-        source = self.data_bases.get(database)
+            return iput_func(self, **kwargs)
+
+        return encryption_wrapper
+
+    def decrypted(input_func):
+        def decryption_wrapper(self, *args, **kwargs):
+            source = self.data_bases.get(kwargs['database'])
+            if hasattr(source, 'password') and source.password != u'':
+                ans = input_func(self, *args, **kwargs)
+                if type(ans) == type([]):
+                    for el in ans:
+                        for fieldname in self.crypted_fields:
+                            if el.has_key(fieldname):
+                                aes = pyaes.AESModeOfOperationCTR(source.password)
+                                val = aes.decrypt(el[fieldname]).decode("utf8")
+                                #val = val.replace("parenth","'")
+                                el[fieldname] = val
+
+                else:
+                    for fieldname in self.crypted_fields:
+                        if ans.has_key(fieldname):
+                            aes = pyaes.AESModeOfOperationCTR(source.password)
+                            ans[fieldname] = aes.decrypt(ans[fieldname]).decode("utf8")
+
+                return ans
+
+        return decryption_wrapper
+
+    @decrypted
+    def get_folders_children(self, **kwargs):
+        source = self.data_bases.get(kwargs['database'])
+        return source.get_data("SELECT * FROM FOLDERS WHERE PARENT = ?", kwargs['parent'], True)
+
+    @decrypted
+    def get_profile_info(self, **kwargs):
+        source = self.data_bases.get(kwargs['database'])
         return source.get_data(
             "SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.ID = ?",
-            parameters)
+            kwargs['ID'])
 
-    def get_folder_id(self, database, parameters=None):
-        source = self.data_bases.get(database)
-        return source.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", parameters)
+    @encrypted
+    def get_folder_id(self, **kwargs):
+        source = self.data_bases.get(kwargs['database'])
+        return source.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", kwargs['Name'])
 
-    def get_profile_id(self, database, parameters=None):
-        source = self.data_bases.get(database)
-        # return source.get_data("SELECT ID FROM PROFILES WHERE NAME = ? ORDER BY ID DESC LIMIT 1", parameters)
+    @encrypted
+    def get_profile_id(self, **kwargs):
+        source = self.data_bases.get(kwargs['database'])
         return source.get_data(
             "SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1",
-            parameters)
+            kwargs['Name'])
 
     def get_child_elements(self, database, idd):
         source = self.data_bases.get(database)
@@ -85,48 +138,51 @@ class DataStorage():
         # deleting profile
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
 
-    def create_new_folder(self, database, parent, name):
-        source = self.data_bases.get(database)
+    @encrypted
+    def create_new_folder(self, **kwargs):
+        source = self.data_bases.get(kwargs['database'])
         source.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
-                       + parent + ",\""
-                       + name + "\" , '')")
+                       + kwargs['parent'] + ",\""
+                       + kwargs['Name'] + "\" , '')")
 
+    @encrypted
     def create_new_profile(self, **kwargs):
-        source = self.data_bases.get(kwargs['storage_name'])
+        source = self.data_bases.get(kwargs['database'])
+
         lastrow = source.execute(
             "INSERT INTO `PROFILES`(`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
             + "1" + "\",\""
-            + kwargs['server'] + "\",\""
-            + kwargs['domain'] + "\",\""
-            + kwargs['port'] + "\",\""
-            + kwargs['user'] + "\",\""
-            + kwargs['password'] + "\")", None, True)
+            + str(kwargs['Server']) + "\",\""
+            + str(kwargs['Domain']) + "\",\""
+            + str(kwargs['Port']) + "\",\""
+            + str(kwargs['User']) + "\",\""
+            + str(kwargs['Password']) + "\")", None, True)
 
         source.execute(
             "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
-            + kwargs['parent'] + "\",\""
-            + kwargs['name'] + "\",\""
+            + str(kwargs['parent']) + "\",\""
+            + str(kwargs['Name']) + "\",\""
             + str(lastrow) + "\")")
 
+    @encrypted
     def update_profile(self, **kwargs):
 
-        source = self.data_bases.get(kwargs['storage_name'])
+        source = self.data_bases.get(kwargs['database'])
         source.execute("UPDATE `PROFILES` SET "
-                       "  'SERVER'='" + kwargs['server'] +
-                       "','DOMAIN'='" + kwargs['domain'] +
-                       "','PORT'='" + kwargs['port'] +
-                       "','USER'='" + kwargs['user'] +
+                       "  'SERVER'='" + str(kwargs['Server']) +
+                       "','DOMAIN'='" + str(kwargs['Domain']) +
+                       "','PORT'='" + str(kwargs['Port']) +
+                       "','USER'='" + str(kwargs['User']) +
                        "' WHERE ID =" + str(kwargs['item_to_edit']))
 
         source.execute("UPDATE `FOLDERS` SET "
-                       " 'NAME'='" + kwargs['name'] +
+                       " 'NAME'='" + str(kwargs['Name']) +
                        "' WHERE PROFILE =" + str(kwargs['item_to_edit']))
 
-        if kwargs['password'] != u'':
+        if kwargs['Password'] != u'':
             source.execute("UPDATE `PROFILES` SET "
-                           " 'PASSWORD'='" + kwargs['password'] +
+                           " 'PASSWORD'='" + str(kwargs['Password']) +
                            "' WHERE ID =" + str(kwargs['item_to_edit']))
-
 
 
 if __name__ == "__main__":

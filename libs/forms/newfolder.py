@@ -64,3 +64,28 @@ class NewFolderWindowUi(object):
         self.pushButtonOk.setText(_translate("NewFolderWin", "OK", None))
         self.labelFolderName.setText(_translate("NewFolderWin", "Name", None))
 
+
+class NewFolderDialog(QtGui.QDialog):
+    def __init__(self, ds, item_data=None):
+        self.updated = False
+        self.ds = ds
+        self.storage = item_data["Storage"]
+        self.parent = item_data["Parent"]
+        QtGui.QWidget.__init__(self, None)
+        self.ui = NewFolderWindowUi()
+        self.ui.setupUi(self)
+        self.ui.pushButtonOk.clicked.connect(self.ok)
+        self.ui.pushButtonCancel.clicked.connect(self.cancel)
+        self.ui.labelParentName.setText("Enter folder name")
+
+    def ok(self):
+        name = unicode(self.ui.lineEditFolderName.text())
+        self.ds.create_new_folder(**dict(database=self.storage, parent=self.parent, Name=name))
+        self.updated = True
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+
+

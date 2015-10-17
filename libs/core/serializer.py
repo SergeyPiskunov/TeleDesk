@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import win32crypt
+import binascii
+
 
 class Serializer:
 
@@ -21,7 +24,9 @@ class Serializer:
 
         #password
         if connection_params["PASSWORD"] != u'':
-            prepared_params.append("password 51:b:"+connection_params["PASSWORD"])
+            pwdHash = win32crypt.CryptProtectData(connection_params["PASSWORD"], u'psw', None, None, None, 0)
+            password = binascii.hexlify(pwdHash)
+            prepared_params.append("password 51:b:"+password)
 
         #domain
         if connection_params["DOMAIN"] != u'':

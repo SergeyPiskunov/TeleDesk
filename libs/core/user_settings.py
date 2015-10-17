@@ -23,7 +23,6 @@ class UserSettings(object):
         self.databases = [{"Name": "local",
                            "Type": "local",
                            "Path": "local.db",
-                           "User": "",
                            "Password": "",
                            "Properties": {}}]
         self.save_config()

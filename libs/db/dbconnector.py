@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
+
 import sqlite3 as sqlite
+from libs.third_parity import pyaes
 
 
 class DBConnector(object):
@@ -11,6 +12,7 @@ class DBConnector(object):
         """ Reads data from the self.db database
             If return_collection=False returns only [0]-element of the query result list. """
         with self.db:
+            self.db.text_factory = bytes
             self.db.row_factory = sqlite.Row
             cursor = self.db.cursor()
             if parameters:
@@ -18,12 +20,16 @@ class DBConnector(object):
             else:
                 cursor.execute(query)
 
-            result = cursor.fetchall()
+            result_rows = cursor.fetchall()
+            result_dict = []
+            for result_row in result_rows:
+                result_dict.append(dict(zip(result_row.keys(), result_row)))
+
             if return_collection:
-                return result
+                return result_dict
             else:
-                if result:
-                    return result[0]
+                if result_dict:
+                    return result_dict[0]
                 return []
 
     def execute(self, query, parameters=None, return_lastrow=None):

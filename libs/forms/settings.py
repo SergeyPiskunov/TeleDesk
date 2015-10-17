@@ -225,3 +225,117 @@ class SettingsTableModel(QtCore.QAbstractTableModel):
         self.endInsertColumns()
 
         return True
+
+
+class UserSettingsDialog(QtGui.QDialog):
+
+    def __init__(self, usersett):
+        from collections import OrderedDict
+
+        QtGui.QWidget.__init__(self, None)
+        self.ui = SettingsWindowUi()
+        self.ui.setupUi(self)
+        self.usersett = usersett
+
+        # dividing list of databases into local and FTP databases
+        # to display them in separate tables
+        localdatabases_columns = OrderedDict([("Name", ""),
+                                              ("Path", ""),
+                                              ("Password", "")])
+
+        ftpdatabases_columns = OrderedDict([("Name", ""),
+                                            ("Path", ""),
+                                            ("Password", ""),
+                                            ("FTP_Server", ""),
+                                            ("FTP_Port", ""),
+                                            ("FTP_User", ""),
+                                            ("FTP_Password", "")])
+        localdatabases = []
+        for x in self.usersett.databases:
+            if x["Type"] == "local":
+                d = OrderedDict([("Name", x["Name"]),
+                                 ("Path", x["Path"]),
+                                 ("Password", x["Password"])])
+                localdatabases.append(d)
+
+        self.ui.localStorageTableView.setModel(SettingsTableModel(localdatabases, localdatabases_columns))
+
+        ftpdatabases = []
+        for x in self.usersett.databases:
+            if x["Type"] == "ftp":
+                d = OrderedDict([("Name", x["Name"]),
+                                 ("Path", x["Path"]),
+                                 ("Password", x["Password"]),
+                                 ("FTP_Server", x["Properties"]["FTP_Server"]),
+                                 ("FTP_Port", x["Properties"]["FTP_Port"]),
+                                 ("FTP_User", x["Properties"]["FTP_User"]),
+                                 ("FTP_Password", x["Properties"]["FTP_Password"])])
+
+                ftpdatabases.append(d)
+
+        self.ui.FTPStorageTableView.setModel(SettingsTableModel(ftpdatabases, ftpdatabases_columns))
+
+        self.ui.OKButton.clicked.connect(self.save)
+        self.ui.CancelButton.clicked.connect(self.cancel)
+        self.ui.deleteLocalStorageButton.clicked.connect(self.removeLocalStorageRow)
+        self.ui.addLocalStorageButton.clicked.connect(self.addLocalStorageRow)
+        self.ui.deleteFTPStorageButton.clicked.connect(self.removeFTPStorageRow)
+        self.ui.addFTPStorageButton.clicked.connect(self.addFTPStorageRow)
+        self.ui.resetButton.clicked.connect(self.resetToDefaults)
+
+    def save(self):
+        self.usersett.databases = self.ui.localStorageTableView.model().databases
+        self.usersett.databases = []
+        localdatabases = [dict(Name=x["Name"],
+                               Type="local",
+                               Properties={},
+                               Path=x["Path"],
+                               Password=x["Password"])
+                          for x in self.ui.localStorageTableView.model().databases]
+
+        ftpdatabases = [dict(Name=x["Name"],
+                             Type="ftp",
+                             Properties=dict(FTP_Server=x["FTP_Server"],
+                                             FTP_Port=int(x["FTP_Port"]),
+                                             FTP_User=x["FTP_User"],
+                                             FTP_Password=x["FTP_Password"]),
+                             Path=x["Path"],
+                             Password=x["Password"])
+                        for x in self.ui.FTPStorageTableView.model().databases]
+
+        self.usersett.databases = localdatabases + ftpdatabases
+
+        self.usersett.save_config()
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+    def addLocalStorageRow(self):
+        selected_index = self.ui.localStorageTableView.model().index(len(self.usersett.databases), 0)
+
+        self.ui.localStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
+
+    def removeLocalStorageRow(self):
+        selected_index = self.ui.localStorageTableView.selectionModel().selectedIndexes()[0]
+
+        self.ui.localStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
+
+    def addFTPStorageRow(self):
+        selected_index = self.ui.FTPStorageTableView.model().index(len(self.usersett.databases), 0)
+
+        self.ui.FTPStorageTableView.model().insertRow(len(self.usersett.databases), selected_index)
+
+    def removeFTPStorageRow(self):
+        selected_index = self.ui.FTPStorageTableView.selectionModel().selectedIndexes()[0]
+
+        self.ui.FTPStorageTableView.model().removeRow(selected_index.row(), selected_index.parent())
+
+    def resetToDefaults(self):
+        reply = QtGui.QMessageBox.question(self, 'Message', "Do ypu want to reset config?",
+                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                   QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            self.usersett.reset_to_dafaults()
+            self.close()
+

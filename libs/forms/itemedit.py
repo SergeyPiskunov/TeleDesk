@@ -2,6 +2,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -112,4 +113,67 @@ class ItemEditWindowUi(object):
         self.tabWidgetSettings.setTabText(self.tabWidgetSettings.indexOf(self.tab_2), _translate("EditWin", "Advanced", None))
         self.pushButtonClose.setText(_translate("EditWin", "Close", None))
         self.pushButtonSave.setText(_translate("EditWin", "Save", None))
+
+
+class ItemEditDialog(QtGui.QDialog):
+    def __init__(self, ds, item_data=None):
+        self.ds = ds
+        self.storage_name = item_data["Storage"]
+        self.updated = False
+        self.parent = item_data["Parent"]
+        QtGui.QWidget.__init__(self, None)
+        self.ui = ItemEditWindowUi()
+        self.ui.setupUi(self)
+        if item_data["Mode"] == "Edit":
+            self.item_to_edit = item_data["ItemData"]["Profile"]
+            self.ui.lineEditName.setText(item_data["ItemData"]["Name"])
+            self.ui.lineEditServer.setText(item_data["ItemData"]["Server"])
+            self.ui.lineEditPort.setText(item_data["ItemData"]["Port"])
+            self.ui.lineEditUser.setText(item_data["ItemData"]["User"])
+            self.ui.lineEditDomain.setText(item_data["ItemData"]["Domain"])
+            self.ui.pushButtonSave.clicked.connect(self.edit_item)
+        elif item_data["Mode"] == "AddItem":
+            # self.ui.lineEditName.setText(item_data["Parent"])
+            self.ui.pushButtonSave.clicked.connect(self.create_new_item)
+        else:
+            pass
+
+    def create_new_item(self):
+
+        self.ds.create_new_profile(**{
+            'parent': self.parent,
+            'database': self.storage_name,
+            'Name': unicode(self.ui.lineEditName.text()),
+            'Server': unicode(self.ui.lineEditServer.text()),
+            'Domain': unicode(self.ui.lineEditDomain.text()),
+            'User': unicode(self.ui.lineEditUser.text()),
+            'Password': unicode(self.ui.lineEditPassword.text()),
+            'Port': str(self.ui.lineEditPort.text())})
+
+        self.updated = True
+        self.close()
+
+    def edit_item(self):
+
+        password = self.ui.lineEditPassword.text()
+
+        if password != u'':
+            password = unicode(password)
+        else:
+            password = ''
+
+        self.ds.update_profile(**{
+            'item_to_edit': self.item_to_edit,
+            'database': self.storage_name,
+            'Name': unicode(self.ui.lineEditName.text()),
+            'Server': unicode(self.ui.lineEditServer.text()),
+            'Domain': unicode(self.ui.lineEditDomain.text()),
+            'User': unicode(self.ui.lineEditUser.text()),
+            'Password': password,
+            'Port': str(self.ui.lineEditPort.text())})
+
+        self.close()
+
+
+
 
