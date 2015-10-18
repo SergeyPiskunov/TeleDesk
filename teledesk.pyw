@@ -42,12 +42,12 @@ class MyWindow(QtGui.QWidget):
         self.show_connections_tree(True)
 
         #updater for all nonlocal  databases
-        #self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
-        #self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
-        #             self.show_msg, QtCore.Qt.QueuedConnection)
-        #self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
-        #             self.show_connections_tree, QtCore.Qt.QueuedConnection)
-        #self.dbupdater.update()
+        self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
+                     self.show_msg, QtCore.Qt.QueuedConnection)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
+                     self.show_connections_tree, QtCore.Qt.QueuedConnection)
+        self.dbupdater.update()
 
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
@@ -137,17 +137,17 @@ class MyWindow(QtGui.QWidget):
             computer_icon = QtGui.QIcon(MyWindow.SERVER_ICON)
 
             for stor in self.user_settings.databases:
-                top_list = self.user_settings.get_top_ten_connections(stor["Name"], 5)
+                top_list = self.user_settings.get_top_connections(stor["Name"], 5)
                 if top_list:
                     node_entry = self.tray_menu.addAction(stor["Name"])
                     node_entry.setIcon(folder_icon)
                     for menu_item in top_list:
-                        item = self.ds.get_profile_info(stor["Name"], menu_item[0])
+                        item = self.ds.get_profile_info(**dict(database=stor["Name"], ID=menu_item))
                         if item:
-                            entry = self.tray_menu.addAction(item["NAME"])
+                            entry = self.tray_menu.addAction(item["Name"])
                             entry.setIcon(computer_icon)
                             self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                         lambda menu_it=(stor["Name"], menu_item): self.init_connection_frommenu(
+                                         lambda menu_it=dict(database=stor["Name"], ID=menu_item): self.init_connection_frommenu(
                                              menu_it))
 
                             # self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
@@ -179,24 +179,24 @@ class MyWindow(QtGui.QWidget):
 
     def fill_tree(self, storage, parent, root):
         cildlist = self.ds.get_folders_children(**dict(database=storage, parent = parent))
+        if cildlist:
+            for chld in cildlist:
+                child_node = QtGui.QStandardItem(chld["Name"])
+                child_node.setData(QtCore.QVariant(unicode(chld["ID"])))
 
-        for chld in cildlist:
-            child_node = QtGui.QStandardItem(chld["Name"])
-            child_node.setData(QtCore.QVariant(unicode(chld["ID"])))
+                # icon = QtGui.QIcon()
+                if str(chld["Profile"]) == u'':
+                    icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
+                elif str(chld["Profile"]):
+                    icon = QtGui.QIcon(MyWindow.SERVER_ICON)
+                else:
+                    pass
 
-            # icon = QtGui.QIcon()
-            if str(chld["Profile"]) == u'':
-                icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
-            elif str(chld["Profile"]):
-                icon = QtGui.QIcon(MyWindow.SERVER_ICON)
-            else:
-                pass
+                child_node.setIcon(icon)
+                root.appendRow(child_node)
+                self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
 
-            child_node.setIcon(icon)
-            root.appendRow(child_node)
-            self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
-
-            self.fill_tree(storage, unicode(chld["ID"]), child_node)
+                self.fill_tree(storage, unicode(chld["ID"]), child_node)
 
     def update_tree(self):
 
@@ -234,20 +234,18 @@ class MyWindow(QtGui.QWidget):
         storage_name = self.get_storage_name(index)
         self.init_connection(storage_name, selected_id)
 
-    def init_connection_frommenu(self, selected_item):
-        storage_name = selected_item[0]
-        selected_id = selected_item[1]
-        self.init_connection(storage_name, selected_id)
+    def init_connection_frommenu(self, menu_item):
+        self.init_connection(menu_item['database'], menu_item['ID'])
 
     def init_connection(self, storage_name, selected_id):
         self.user_settings.update_item_rating(storage_name, selected_id)
-        item = self.ds.get_profile_info(storage_name, selected_id)
-        if item.__len__():
-            te = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["NAME"] + ".rdp")
+        item = self.ds.get_profile_info(**dict(database=storage_name, ID=selected_id))
+        if item:
+            te = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["Name"] + ".rdp")
             if te:
-                os.startfile(item["NAME"] + ".rdp")
+                os.startfile(item["Name"] + ".rdp")
                 time.sleep(5)
-                os.remove(item["NAME"] + ".rdp")
+                os.remove(item["Name"] + ".rdp")
 
     def edit_item(self):
         index = self.ui.treeView.selectedIndexes()[0]

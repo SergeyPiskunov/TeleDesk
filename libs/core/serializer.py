@@ -13,24 +13,24 @@ class Serializer:
         prepared_params = []
 
         #server + port
-        if connection_params["PORT"] == u'0' or u'':
-            prepared_params.append("full address:s:"+connection_params["SERVER"]+":3389")
+        if len(connection_params["Port"]) == 0:
+            prepared_params.append("full address:s:"+connection_params["Server"]+":3389")
         else:
-            prepared_params.append("full address:s:"+connection_params["SERVER"]+":"+connection_params["PORT"])
+            prepared_params.append("full address:s:"+connection_params["Server"]+":"+connection_params["Port"])
 
         #username
-        if connection_params["USER"] != u'':
-            prepared_params.append("username:s:"+connection_params["USER"])
+        if connection_params["User"] != u'':
+            prepared_params.append("username:s:"+connection_params["User"])
 
         #password
-        if connection_params["PASSWORD"] != u'':
-            pwdHash = win32crypt.CryptProtectData(connection_params["PASSWORD"], u'psw', None, None, None, 0)
+        if connection_params["Password"] != u'':
+            pwdHash = win32crypt.CryptProtectData(connection_params["Password"], u'psw', None, None, None, 0)
             password = binascii.hexlify(pwdHash)
             prepared_params.append("password 51:b:"+password)
 
         #domain
-        if connection_params["DOMAIN"] != u'':
-            prepared_params.append("domain:s:"+connection_params["DOMAIN"])
+        if connection_params["Domain"] != u'':
+            prepared_params.append("domain:s:"+connection_params["Domain"])
 
         serialized_item = "\n".join(prepared_params)
         return serialized_item

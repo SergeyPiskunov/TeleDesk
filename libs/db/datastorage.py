@@ -12,7 +12,7 @@ class DataBase(DBConnector):
         self.name = kwargs['Name']
         self.type = kwargs['Type']
         self.path = kwargs['Path']
-        if kwargs['Password'] != u'':
+        if len(kwargs['Password']) != 0:
             key = kwargs['Password']
             if len(key) > 16:
                 key = key[:16]
@@ -62,10 +62,7 @@ class DataStorage():
                 for fieldname in self.crypted_fields:
                     if kwargs.has_key(fieldname):
                         aes = pyaes.AESModeOfOperationCTR(source.password)
-                        val = aes.encrypt(kwargs[fieldname].encode("utf8"))
-                        #val = val.replace("'", bytes(10101011))
-                        kwargs[fieldname] = val
-
+                        kwargs[fieldname] = aes.encrypt(kwargs[fieldname].encode("utf8"))
             return iput_func(self, **kwargs)
 
         return encryption_wrapper
@@ -74,23 +71,22 @@ class DataStorage():
         def decryption_wrapper(self, *args, **kwargs):
             source = self.data_bases.get(kwargs['database'])
             if hasattr(source, 'password') and source.password != u'':
-                ans = input_func(self, *args, **kwargs)
-                if type(ans) == type([]):
-                    for el in ans:
+                result = input_func(self, *args, **kwargs)
+                if isinstance(result, list):
+                    for result_dict in result:
                         for fieldname in self.crypted_fields:
-                            if el.has_key(fieldname):
+                            if result_dict.has_key(fieldname):
                                 aes = pyaes.AESModeOfOperationCTR(source.password)
-                                val = aes.decrypt(el[fieldname]).decode("utf8")
-                                #val = val.replace("parenth","'")
-                                el[fieldname] = val
-
+                                result_dict[fieldname] = aes.decrypt(result_dict[fieldname]).decode("utf8")
                 else:
                     for fieldname in self.crypted_fields:
-                        if ans.has_key(fieldname):
+                        if result.has_key(fieldname):
                             aes = pyaes.AESModeOfOperationCTR(source.password)
-                            ans[fieldname] = aes.decrypt(ans[fieldname]).decode("utf8")
+                            result[fieldname] = aes.decrypt(result[fieldname]).decode("utf8")
+                return result
+            else:
+                return input_func(self, *args, **kwargs)
 
-                return ans
 
         return decryption_wrapper
 
@@ -179,7 +175,7 @@ class DataStorage():
                        " 'NAME'='" + str(kwargs['Name']) +
                        "' WHERE PROFILE =" + str(kwargs['item_to_edit']))
 
-        if kwargs['Password'] != u'':
+        if len(kwargs['Password']) != 0:
             source.execute("UPDATE `PROFILES` SET "
                            " 'PASSWORD'='" + str(kwargs['Password']) +
                            "' WHERE ID =" + str(kwargs['item_to_edit']))

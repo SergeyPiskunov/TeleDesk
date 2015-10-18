@@ -64,7 +64,7 @@ class UserSettings(object):
             self.top_ten_connections[storage_name] = {item: 1}
         self.save_config()
 
-    def get_top_ten_connections(self, storage_name, items=5):
+    def get_top_connections(self, storage_name, items=5):
         """ Returns top(items) most frequently used connections """
         if self.top_ten_connections:
 
@@ -76,7 +76,7 @@ class UserSettings(object):
             if items > len(top_list):
                 items = len(top_list)
             for i in range(items):
-                result.append(top_list[i])
+                result.append(top_list[i][0])
             return result
         else:
             return None
