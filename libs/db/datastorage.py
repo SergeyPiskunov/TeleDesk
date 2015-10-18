@@ -8,7 +8,7 @@ class DataBase(DBConnector):
     and it's name, path, type [local or shared] """
 
     def __init__(self, **kwargs):
-        DBConnector.__init__(self, kwargs['Path'])
+        DBConnector.__init__(self, kwargs['Path'], len(kwargs['Password']) != 0)
         self.name = kwargs['Name']
         self.type = kwargs['Type']
         self.path = kwargs['Path']
@@ -45,7 +45,6 @@ class DataStorage():
 
                 database.execute("CREATE TABLE `PROFILES` ("
                                  "`ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
-                                 "`Rating` INTEGER,"
                                  "`Server` TEXT,"
                                  "`Port` TEXT,"
                                  "`User` TEXT,"
@@ -77,12 +76,12 @@ class DataStorage():
                         for fieldname in self.crypted_fields:
                             if result_dict.has_key(fieldname):
                                 aes = pyaes.AESModeOfOperationCTR(source.password)
-                                result_dict[fieldname] = aes.decrypt(result_dict[fieldname]).decode("utf8")
+                                result_dict[fieldname] = unicode(aes.decrypt(result_dict[fieldname]).decode("utf8"))
                 else:
                     for fieldname in self.crypted_fields:
                         if result.has_key(fieldname):
                             aes = pyaes.AESModeOfOperationCTR(source.password)
-                            result[fieldname] = aes.decrypt(result[fieldname]).decode("utf8")
+                            result[fieldname] = unicode(aes.decrypt(result[fieldname]).decode("utf8"))
                 return result
             else:
                 return input_func(self, *args, **kwargs)
@@ -119,7 +118,7 @@ class DataStorage():
         return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)",
                                idd, True)
 
-    def delete_folder(self, database, idd):
+    def delete_group(self, database, idd):
         source = self.data_bases.get(database)
 
         # deleting all child profiles
@@ -135,7 +134,8 @@ class DataStorage():
         source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
 
     @encrypted
-    def create_new_folder(self, **kwargs):
+    def create_new_group(self, **kwargs):
+
         source = self.data_bases.get(kwargs['database'])
         source.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
                        + kwargs['parent'] + ",\""
@@ -145,40 +145,53 @@ class DataStorage():
     def create_new_profile(self, **kwargs):
         source = self.data_bases.get(kwargs['database'])
 
+        """
         lastrow = source.execute(
-            "INSERT INTO `PROFILES`(`Rating`,`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
-            + "1" + "\",\""
-            + str(kwargs['Server']) + "\",\""
-            + str(kwargs['Domain']) + "\",\""
-            + str(kwargs['Port']) + "\",\""
-            + str(kwargs['User']) + "\",\""
-            + str(kwargs['Password']) + "\")", None, True)
+            "INSERT INTO `PROFILES`(`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
+            + kwargs['Server'] + "\",\""
+            + kwargs['Domain'] + "\",\""
+            + kwargs['Port'] + "\",\""
+            + kwargs['User'] + "\",\""
+            + kwargs['Password'] + "\")", None, True)
+        """
+        lastrow = source.execute("INSERT INTO PROFILES(Server) VALUES (?) ", (kwargs['Server'],), True)
+        source.execute("UPDATE 'PROFILES' SET 'DOMAIN'='" + kwargs['Domain']+"' WHERE ID =" + str(lastrow))
+        source.execute("UPDATE 'PROFILES' SET 'USER'='" + kwargs['User']+"' WHERE ID =" + str(lastrow))
+        source.execute("UPDATE 'PROFILES' SET 'PORT'='" + kwargs['Port']+"' WHERE ID =" + str(lastrow))
+        source.execute("UPDATE 'PROFILES' SET 'PASSWORD'='" + kwargs['Password']+"' WHERE ID =" + str(lastrow))
 
         source.execute(
             "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
             + str(kwargs['parent']) + "\",\""
-            + str(kwargs['Name']) + "\",\""
+            + kwargs['Name'] + "\",\""
             + str(lastrow) + "\")")
 
     @encrypted
     def update_profile(self, **kwargs):
 
         source = self.data_bases.get(kwargs['database'])
+        """
         source.execute("UPDATE `PROFILES` SET "
-                       "  'SERVER'='" + str(kwargs['Server']) +
-                       "','DOMAIN'='" + str(kwargs['Domain']) +
-                       "','PORT'='" + str(kwargs['Port']) +
-                       "','USER'='" + str(kwargs['User']) +
-                       "' WHERE ID =" + str(kwargs['item_to_edit']))
+                       "  'SERVER'='" + kwargs['Server'] +
+                       "','DOMAIN'='" + kwargs['Domain'] +
+                       "','PORT'='" + kwargs['Port'] +
+                       "','USER'='" + kwargs['User'] +
+                       "' WHERE ID =" + kwargs['item_to_edit'])
+        """
+        source.execute("UPDATE `PROFILES` SET 'SERVER'='" + kwargs['Server']+"' WHERE ID =" + kwargs['item_to_edit'])
+        source.execute("UPDATE `PROFILES` SET 'DOMAIN'='" + kwargs['Domain']+"' WHERE ID =" + kwargs['item_to_edit'])
+        source.execute("UPDATE `PROFILES` SET 'USER'='" + kwargs['User']+"' WHERE ID =" + kwargs['item_to_edit'])
+        source.execute("UPDATE `PROFILES` SET 'PORT'='" + kwargs['Port']+"' WHERE ID =" + kwargs['item_to_edit'])
+
 
         source.execute("UPDATE `FOLDERS` SET "
-                       " 'NAME'='" + str(kwargs['Name']) +
-                       "' WHERE PROFILE =" + str(kwargs['item_to_edit']))
+                       " 'NAME'='" + kwargs['Name'] +
+                       "' WHERE PROFILE =" + kwargs['item_to_edit'])
 
         if len(kwargs['Password']) != 0:
             source.execute("UPDATE `PROFILES` SET "
-                           " 'PASSWORD'='" + str(kwargs['Password']) +
-                           "' WHERE ID =" + str(kwargs['item_to_edit']))
+                           " 'PASSWORD'='" + kwargs['Password'] +
+                           "' WHERE ID =" + kwargs['item_to_edit'])
 
 
 if __name__ == "__main__":

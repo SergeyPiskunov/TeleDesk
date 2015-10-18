@@ -4,7 +4,7 @@ import ftp_connector
 
 
 class DBUpdater(QtCore.QThread):
-    """ Updates all non-local databases
+    """ Updates all non-local databases in a new thread
      and provides status callbacks to the main GUI  """
 
     def __init__(self, storages, parent=None):

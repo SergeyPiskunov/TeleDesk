@@ -1,18 +1,18 @@
-
+# -*- coding: utf-8 -*-
 import sqlite3 as sqlite
-from libs.third_parity import pyaes
 
 
 class DBConnector(object):
     """ SQLite Database wrapper """
-    def __init__(self, db_file):
+    def __init__(self, db_file, encrypted):
         self.db = sqlite.connect(db_file)
+        if encrypted:
+            self.db.text_factory = bytes
 
     def get_data(self, query, parameters=None, return_collection=None):
         """ Reads data from the self.db database
             If return_collection=False returns only [0]-element of the query result list. """
         with self.db:
-            self.db.text_factory = bytes
             self.db.row_factory = sqlite.Row
             cursor = self.db.cursor()
             if parameters:
@@ -20,6 +20,7 @@ class DBConnector(object):
             else:
                 cursor.execute(query)
 
+            #convert sqlite3Row to a list of dicts
             result_rows = cursor.fetchall()
             result_dict = []
             for result_row in result_rows:
@@ -38,7 +39,7 @@ class DBConnector(object):
         with self.db:
             cursor = self.db.cursor()
             if parameters:
-                cursor.execute(query, (parameters,))
+                cursor.execute(query, parameters)
             else:
                 cursor.execute(query)
             self.db.commit()

@@ -3,8 +3,8 @@ import pickle
 
 
 class UserSettings(object):
-    """ Initializing with path to user settings file.
-    Allow to load and save user settings via pickle  """
+    """ Allows to load and save user settings
+        in a given config file using pickle """
 
     def __init__(self, config_file='u_config.cfg'):
         self.config_file = config_file
@@ -14,7 +14,7 @@ class UserSettings(object):
         self.databases = {}
         self.top_ten_connections = {}
 
-    def reset_to_dafaults(self, config_file=None):
+    def reset_to_dafaults(self):
         """ Writes default settings to the self.config_file """
         self.master_login = 'root'
         self.master_password = 'toor'
@@ -65,12 +65,12 @@ class UserSettings(object):
         self.save_config()
 
     def get_top_connections(self, storage_name, items=5):
-        """ Returns top(items) most frequently used connections """
+        """ Returns top(items) of most frequently used connections """
         if self.top_ten_connections:
-
             if not self.top_ten_connections.has_key(storage_name):
                 return None
 
+            # sorting items by usage frequency
             top_list = sorted(self.top_ten_connections[storage_name].items(), key=lambda x: x[1], reverse=True)
             result = []
             if items > len(top_list):
@@ -85,4 +85,3 @@ class UserSettings(object):
 if __name__ == "__main__":
     user_settings = UserSettings()
     user_settings.reset_to_dafaults()
-    # user_settings.load_config()

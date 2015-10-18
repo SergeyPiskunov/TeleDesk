@@ -2,7 +2,6 @@
 
 from PyQt4 import QtCore, QtGui
 
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -11,13 +10,16 @@ except AttributeError:
 
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
+
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class ItemEditWindowUi(object):
+
+class ItemEditDialogUi(object):
+    """ User interface definition """
     def setupUi(self, EditWin):
         EditWin.setObjectName(_fromUtf8("EditWin"))
         EditWin.setFixedSize(QtCore.QSize(450, 380))
@@ -67,6 +69,7 @@ class ItemEditWindowUi(object):
         self.gridLayout.addWidget(self.labelPassword, 4, 0, 1, 1)
         self.lineEditPassword = QtGui.QLineEdit(self.layoutWidget)
         self.lineEditPassword.setObjectName(_fromUtf8("lineEditPassword"))
+        self.lineEditPassword.setEchoMode(QtGui.QLineEdit.Password)
         self.gridLayout.addWidget(self.lineEditPassword, 4, 1, 1, 1)
         self.labelPort = QtGui.QLabel(self.layoutWidget)
         self.labelPort.setObjectName(_fromUtf8("labelPort"))
@@ -109,21 +112,29 @@ class ItemEditWindowUi(object):
         self.labelPassword.setText(_translate("EditWin", "Password", None))
         self.labelPort.setText(_translate("EditWin", "Port", None))
         self.checkBoxShowPassword.setText(_translate("EditWin", "Show password", None))
-        self.tabWidgetSettings.setTabText(self.tabWidgetSettings.indexOf(self.tab), _translate("EditWin", "Main", None))
-        self.tabWidgetSettings.setTabText(self.tabWidgetSettings.indexOf(self.tab_2), _translate("EditWin", "Advanced", None))
+        self.tabWidgetSettings.setTabText(self.tabWidgetSettings.indexOf(self.tab),
+                                          _translate("EditWin", "Main", None))
+        self.tabWidgetSettings.setTabText(self.tabWidgetSettings.indexOf(self.tab_2),
+                                          _translate("EditWin", "Advanced", None))
         self.pushButtonClose.setText(_translate("EditWin", "Close", None))
         self.pushButtonSave.setText(_translate("EditWin", "Save", None))
 
 
 class ItemEditDialog(QtGui.QDialog):
-    def __init__(self, ds, item_data=None):
-        self.ds = ds
-        self.storage_name = item_data["Storage"]
-        self.updated = False
-        self.parent = item_data["Parent"]
+    """ Dialog allows to edit existing profile
+        or create a new one"""
+
+    def __init__(self, database, item_data=None):
         QtGui.QWidget.__init__(self, None)
-        self.ui = ItemEditWindowUi()
+        self.ui = ItemEditDialogUi()
         self.ui.setupUi(self)
+        self.ui.pushButtonClose.clicked.connect(self.close)
+        self.database = database
+        self.storage_name = item_data["Storage"]
+        self.parent = item_data["Parent"]
+        self.updated = False
+
+        #Editing existing profile or creating a new one
         if item_data["Mode"] == "Edit":
             self.item_to_edit = item_data["ItemData"]["Profile"]
             self.ui.lineEditName.setText(item_data["ItemData"]["Name"])
@@ -131,16 +142,17 @@ class ItemEditDialog(QtGui.QDialog):
             self.ui.lineEditPort.setText(item_data["ItemData"]["Port"])
             self.ui.lineEditUser.setText(item_data["ItemData"]["User"])
             self.ui.lineEditDomain.setText(item_data["ItemData"]["Domain"])
+            self.ui.lineEditPassword.setText(item_data["ItemData"]["Password"])
             self.ui.pushButtonSave.clicked.connect(self.edit_item)
         elif item_data["Mode"] == "AddItem":
-            # self.ui.lineEditName.setText(item_data["Parent"])
             self.ui.pushButtonSave.clicked.connect(self.create_new_item)
         else:
             pass
 
     def create_new_item(self):
 
-        self.ds.create_new_profile(**{
+        #write data to the database
+        self.database.create_new_profile(**{
             'parent': self.parent,
             'database': self.storage_name,
             'Name': unicode(self.ui.lineEditName.text()),
@@ -149,31 +161,24 @@ class ItemEditDialog(QtGui.QDialog):
             'User': unicode(self.ui.lineEditUser.text()),
             'Password': unicode(self.ui.lineEditPassword.text()),
             'Port': str(self.ui.lineEditPort.text())})
-
         self.updated = True
         self.close()
 
     def edit_item(self):
 
-        password = self.ui.lineEditPassword.text()
-
-        if password != u'':
-            password = unicode(password)
-        else:
-            password = ''
-
-        self.ds.update_profile(**{
+        #write data to the database
+        self.database.update_profile(**{
             'item_to_edit': self.item_to_edit,
             'database': self.storage_name,
             'Name': unicode(self.ui.lineEditName.text()),
             'Server': unicode(self.ui.lineEditServer.text()),
             'Domain': unicode(self.ui.lineEditDomain.text()),
             'User': unicode(self.ui.lineEditUser.text()),
-            'Password': password,
+            'Password': unicode(self.ui.lineEditPassword.text()),
             'Port': str(self.ui.lineEditPort.text())})
-
         self.close()
 
 
-
+if __name__ == "__main__":
+    pass
 

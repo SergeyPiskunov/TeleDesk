@@ -182,7 +182,7 @@ class MyWindow(QtGui.QWidget):
         if cildlist:
             for chld in cildlist:
                 child_node = QtGui.QStandardItem(chld["Name"])
-                child_node.setData(QtCore.QVariant(unicode(chld["ID"])))
+                child_node.setData(QtCore.QVariant(chld["ID"]))
 
                 # icon = QtGui.QIcon()
                 if str(chld["Profile"]) == u'':
@@ -196,7 +196,7 @@ class MyWindow(QtGui.QWidget):
                 root.appendRow(child_node)
                 self.ui.treeView.expand(self.ui.treeView.model().indexFromItem(child_node))
 
-                self.fill_tree(storage, unicode(chld["ID"]), child_node)
+                self.fill_tree(storage, chld["ID"], child_node)
 
     def update_tree(self):
 
@@ -220,7 +220,10 @@ class MyWindow(QtGui.QWidget):
             if item.__len__():
                 name = unicode(item["Name"])
                 server = unicode(item["Server"])
-                port = str(item["Port"])
+                if len(item["Port"]) == 0:
+                    port = '3389'
+                else:
+                    port = str(item["Port"])
                 user = unicode(item["User"])
                 self.ui.labelStatus.setText(" Name - " + name + "\n"
                                             + " Server - " + server + "\n"
@@ -299,7 +302,7 @@ class MyWindow(QtGui.QWidget):
         # if item.__len__():
         if 1 == 1:
             item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
-            inputter = newfolder.NewFolderDialog(self.ds, item_data)
+            inputter = newfolder.NewGroupDialog(self.ds, item_data)
             inputter.exec_()
             if inputter.updated:
                 self.update_tree()
@@ -316,13 +319,13 @@ class MyWindow(QtGui.QWidget):
                                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                    QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
-                    self.ds.delete_folder(storage_name, selected_id)
+                    self.ds.delete_group(storage_name, selected_id)
             else:
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element?",
                                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                    QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
-                    self.ds.delete_folder(storage_name, selected_id)
+                    self.ds.delete_group(storage_name, selected_id)
 
             self.update_tree()
 

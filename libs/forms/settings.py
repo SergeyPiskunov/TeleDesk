@@ -1,12 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'C:\Users\serj\PycharmProjects\helloworld.ui'
-#
-# Created: Fri Oct 09 21:59:43 2015
-# by: PyQt4 UI code generator 4.11.3
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -25,7 +17,8 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
-class SettingsWindowUi(object):
+class UserSettingsDialogUi(object):
+    """ User interface definition """
     def setupUi(self, UserSettingsWindow):
         UserSettingsWindow.setObjectName(_fromUtf8("UserSettingsWindow"))
         UserSettingsWindow.resize(591, 270)
@@ -233,7 +226,7 @@ class UserSettingsDialog(QtGui.QDialog):
         from collections import OrderedDict
 
         QtGui.QWidget.__init__(self, None)
-        self.ui = SettingsWindowUi()
+        self.ui = UserSettingsDialogUi()
         self.ui.setupUi(self)
         self.usersett = usersett
 
@@ -339,3 +332,7 @@ class UserSettingsDialog(QtGui.QDialog):
             self.usersett.reset_to_dafaults()
             self.close()
 
+
+
+if __name__ == "__main__":
+    pass
