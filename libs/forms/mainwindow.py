@@ -20,11 +20,11 @@ except AttributeError:
 class MainWindowUi(object):
     def setupUi(self, MyWin):
         MyWin.setObjectName(_fromUtf8("MyWin"))
-        MyWin.resize(243, 579)
+        MyWin.resize(243, 600)
         MyWin.setContentsMargins(-10, -10, -10, -25)
 
-        MyWin.setMinimumSize(243, 579)
-        MyWin.setMaximumSize(243, 800)
+        MyWin.setMinimumSize(243, 600)
+        MyWin.setMaximumSize(243, 600)
 
         self.verticalLayout = QtGui.QVBoxLayout(MyWin)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))

@@ -23,6 +23,7 @@ class DBUpdater(QtCore.QThread):
                     self.emit(QtCore.SIGNAL("show_connections_tree()"), )
                 else:
                     self.emit(QtCore.SIGNAL("show_msg(PyQt_PyObject)"), result["message"])
+        self.quit()
 
 
 if __name__ == "__main__":

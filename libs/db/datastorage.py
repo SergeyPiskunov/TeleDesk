@@ -12,6 +12,8 @@ class DataBase(DBConnector):
         self.name = kwargs['Name']
         self.type = kwargs['Type']
         self.path = kwargs['Path']
+
+        # According to the AES128 password length must be 16
         if len(kwargs['Password']) != 0:
             key = kwargs['Password']
             if len(key) > 16:
@@ -34,7 +36,8 @@ class DataStorage():
         for db in data_sources:
             database = DataBase(**db)
             self.data_bases[db["Name"]] = database
-            # if the database is blank create all necessary tables
+
+            # if the database is blank(new) create all necessary tables
             tables = database.get_data("SELECT name FROM sqlite_master")
             if not tables:
                 database.execute("CREATE TABLE `FOLDERS` ("
@@ -63,7 +66,6 @@ class DataStorage():
                         aes = pyaes.AESModeOfOperationCTR(source.password)
                         kwargs[fieldname] = aes.encrypt(kwargs[fieldname].encode("utf8"))
             return iput_func(self, **kwargs)
-
         return encryption_wrapper
 
     def decrypted(input_func):
@@ -85,8 +87,6 @@ class DataStorage():
                 return result
             else:
                 return input_func(self, *args, **kwargs)
-
-
         return decryption_wrapper
 
     @decrypted
@@ -97,101 +97,133 @@ class DataStorage():
     @decrypted
     def get_profile_info(self, **kwargs):
         source = self.data_bases.get(kwargs['database'])
-        return source.get_data(
-            "SELECT * FROM PROFILES LEFT JOIN FOLDERS ON FOLDERS.Profile = PROFILES.ID WHERE FOLDERS.ID = ?",
-            kwargs['ID'])
+
+        return source.get_data("SELECT * FROM PROFILES "
+                               "LEFT JOIN FOLDERS "
+                               "ON FOLDERS.Profile = PROFILES.ID "
+                               "WHERE FOLDERS.ID = ?",
+                               kwargs['ID'])
 
     @encrypted
     def get_folder_id(self, **kwargs):
         source = self.data_bases.get(kwargs['database'])
-        return source.get_data("SELECT ID FROM FOLDERS WHERE PROFILE = '' AND NAME = ?", kwargs['Name'])
+
+        return source.get_data("SELECT ID FROM FOLDERS "
+                               "WHERE NAME =? AND PROFILE is null",
+                               (kwargs['Name']))
 
     @encrypted
     def get_profile_id(self, **kwargs):
         source = self.data_bases.get(kwargs['database'])
-        return source.get_data(
-            "SELECT ID FROM PROFILES WHERE PROFILES.ID IN (SELECT FOLDERS.Profile FROM FOLDERS WHERE FOLDERS.Name = ?) ORDER BY ID DESC LIMIT 1",
-            kwargs['Name'])
+
+        return source.get_data("SELECT ID FROM PROFILES "
+                               "WHERE PROFILES.ID IN "
+                               "(SELECT FOLDERS.Profile FROM FOLDERS "
+                               "WHERE FOLDERS.Name = ?) "
+                               "ORDER BY ID DESC LIMIT 1",
+                               kwargs['Name'])
 
     def get_child_elements(self, database, idd):
         source = self.data_bases.get(database)
-        return source.get_data("SELECT ID FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = ?)",
+
+        return source.get_data("SELECT ID FROM PROFILES "
+                               "WHERE ID IN "
+                               "(SELECT PROFILE FROM FOLDERS "
+                               "WHERE PARENT = ?)",
                                idd, True)
 
     def delete_group(self, database, idd):
         source = self.data_bases.get(database)
 
         # deleting all child profiles
-        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE PARENT = \"" + idd + "\")")
+        source.execute("DELETE FROM PROFILES "
+                       "WHERE ID IN "
+                       "(SELECT PROFILE FROM FOLDERS "
+                       "WHERE PARENT =?)", (idd,))
 
         # deleting all child folders
-        source.execute("DELETE FROM FOLDERS WHERE PARENT = \"" + idd + "\"")
+        source.execute("DELETE FROM FOLDERS "
+                       "WHERE PARENT =?", (idd,))
 
         # deleting folder
-        source.execute("DELETE FROM PROFILES WHERE ID IN (SELECT PROFILE FROM FOLDERS WHERE ID = \"" + idd + "\")")
+        source.execute("DELETE FROM PROFILES "
+                       "WHERE ID IN "
+                       "(SELECT PROFILE FROM FOLDERS "
+                       "WHERE ID = ?)", (idd,))
 
         # deleting profile
-        source.execute("DELETE FROM FOLDERS WHERE ID = \"" + idd + "\"")
+        source.execute("DELETE FROM FOLDERS "
+                       "WHERE ID = ?", (idd,))
 
     @encrypted
     def create_new_group(self, **kwargs):
-
         source = self.data_bases.get(kwargs['database'])
-        source.execute("INSERT INTO `FOLDERS`(`Parent`,`Name`,`Profile`) VALUES ("
-                       + kwargs['parent'] + ",\""
-                       + kwargs['Name'] + "\" , '')")
+
+        source.execute("INSERT INTO FOLDERS ("
+                       "Parent, "
+                       "Name "
+                       ") VALUES (?,?) ",
+                       (kwargs['parent'],
+                        kwargs['Name']))
 
     @encrypted
     def create_new_profile(self, **kwargs):
         source = self.data_bases.get(kwargs['database'])
 
-        """
-        lastrow = source.execute(
-            "INSERT INTO `PROFILES`(`Server`,`Domain`,`Port`,`User`,`Password`) VALUES (\""
-            + kwargs['Server'] + "\",\""
-            + kwargs['Domain'] + "\",\""
-            + kwargs['Port'] + "\",\""
-            + kwargs['User'] + "\",\""
-            + kwargs['Password'] + "\")", None, True)
-        """
-        lastrow = source.execute("INSERT INTO PROFILES(Server) VALUES (?) ", (kwargs['Server'],), True)
-        source.execute("UPDATE 'PROFILES' SET 'DOMAIN'='" + kwargs['Domain']+"' WHERE ID =" + str(lastrow))
-        source.execute("UPDATE 'PROFILES' SET 'USER'='" + kwargs['User']+"' WHERE ID =" + str(lastrow))
-        source.execute("UPDATE 'PROFILES' SET 'PORT'='" + kwargs['Port']+"' WHERE ID =" + str(lastrow))
-        source.execute("UPDATE 'PROFILES' SET 'PASSWORD'='" + kwargs['Password']+"' WHERE ID =" + str(lastrow))
+        # Inserting connection properties
+        lastrow = source.execute("INSERT INTO PROFILES("
+                                 "Server, "
+                                 "Port, "
+                                 "User, "
+                                 "Domain, "
+                                 "Password"
+                                 ") VALUES (?,?,?,?,?) ",
+                                 (kwargs['Server'],
+                                  kwargs['Port'],
+                                  kwargs['User'],
+                                  kwargs['Domain'],
+                                  kwargs['Password'],), True)
 
-        source.execute(
-            "INSERT INTO `FOLDERS`(`PARENT`, 'NAME', 'PROFILE') VALUES (\""
-            + str(kwargs['parent']) + "\",\""
-            + kwargs['Name'] + "\",\""
-            + str(lastrow) + "\")")
+        # Inserting group/name
+        source.execute("INSERT INTO FOLDERS("
+                       "Parent, "
+                       "Name, "
+                       "Profile "
+                       ") VALUES (?,?,?)",
+                       (str(kwargs['parent']),
+                        kwargs['Name'],
+                        str(lastrow)))
 
     @encrypted
     def update_profile(self, **kwargs):
+        database = self.data_bases.get(kwargs['database'])
 
-        source = self.data_bases.get(kwargs['database'])
-        """
-        source.execute("UPDATE `PROFILES` SET "
-                       "  'SERVER'='" + kwargs['Server'] +
-                       "','DOMAIN'='" + kwargs['Domain'] +
-                       "','PORT'='" + kwargs['Port'] +
-                       "','USER'='" + kwargs['User'] +
-                       "' WHERE ID =" + kwargs['item_to_edit'])
-        """
-        source.execute("UPDATE `PROFILES` SET 'SERVER'='" + kwargs['Server']+"' WHERE ID =" + kwargs['item_to_edit'])
-        source.execute("UPDATE `PROFILES` SET 'DOMAIN'='" + kwargs['Domain']+"' WHERE ID =" + kwargs['item_to_edit'])
-        source.execute("UPDATE `PROFILES` SET 'USER'='" + kwargs['User']+"' WHERE ID =" + kwargs['item_to_edit'])
-        source.execute("UPDATE `PROFILES` SET 'PORT'='" + kwargs['Port']+"' WHERE ID =" + kwargs['item_to_edit'])
+        # Updating connection properties
+        database.execute("UPDATE PROFILES "
+                         "SET "
+                         "Server=?, "
+                         "Port=?, "
+                         "User=?, "
+                         "Domain=?, "
+                         "Password=? "
+                         "WHERE "
+                         "ID =? ",
+                         (kwargs['Server'],
+                          kwargs['Port'],
+                          kwargs['User'],
+                          kwargs['Domain'],
+                          kwargs['Password'],
+                          kwargs['item_to_edit']))
 
+        # Updating connection name
+        database.execute("UPDATE FOLDERS "
+                         "SET "
+                         "Name=? "
+                         "WHERE "
+                         "Profile =? ",
+                         (kwargs['Name'],
+                          kwargs['item_to_edit']))
 
-        source.execute("UPDATE `FOLDERS` SET "
-                       " 'NAME'='" + kwargs['Name'] +
-                       "' WHERE PROFILE =" + kwargs['item_to_edit'])
-
-        if len(kwargs['Password']) != 0:
-            source.execute("UPDATE `PROFILES` SET "
-                           " 'PASSWORD'='" + kwargs['Password'] +
-                           "' WHERE ID =" + kwargs['item_to_edit'])
 
 
 if __name__ == "__main__":

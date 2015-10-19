@@ -139,11 +139,11 @@ class MyWindow(QtGui.QWidget):
             for stor in self.user_settings.databases:
                 top_list = self.user_settings.get_top_connections(stor["Name"], 5)
                 if top_list:
-                    node_entry = self.tray_menu.addAction(stor["Name"])
-                    node_entry.setIcon(folder_icon)
                     for menu_item in top_list:
                         item = self.ds.get_profile_info(**dict(database=stor["Name"], ID=menu_item))
                         if item:
+                            node_entry = self.tray_menu.addAction(stor["Name"])
+                            node_entry.setIcon(folder_icon)
                             entry = self.tray_menu.addAction(item["Name"])
                             entry.setIcon(computer_icon)
                             self.connect(entry, QtCore.SIGNAL('triggered()'),
@@ -185,12 +185,11 @@ class MyWindow(QtGui.QWidget):
                 child_node.setData(QtCore.QVariant(chld["ID"]))
 
                 # icon = QtGui.QIcon()
-                if str(chld["Profile"]) == u'':
+                if chld["Profile"] == None:
                     icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
-                elif str(chld["Profile"]):
-                    icon = QtGui.QIcon(MyWindow.SERVER_ICON)
                 else:
-                    pass
+                    icon = QtGui.QIcon(MyWindow.SERVER_ICON)
+
 
                 child_node.setIcon(icon)
                 root.appendRow(child_node)
@@ -233,9 +232,11 @@ class MyWindow(QtGui.QWidget):
                 self.ui.labelStatus.setText("")
 
     def init_connection_fromwindow(self, index):
+
         selected_id = str(index.model().itemFromIndex(index).data().toString())
-        storage_name = self.get_storage_name(index)
-        self.init_connection(storage_name, selected_id)
+        if selected_id:
+            storage_name = self.get_storage_name(index)
+            self.init_connection(storage_name, selected_id)
 
     def init_connection_frommenu(self, menu_item):
         self.init_connection(menu_item['database'], menu_item['ID'])
