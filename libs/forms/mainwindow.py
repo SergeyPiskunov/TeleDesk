@@ -27,6 +27,13 @@ class MainWindowUi(object):
         MyWin.setMinimumSize(243, 600)
         MyWin.setMaximumSize(243, 600)
 
+        #defining UI icons
+        self.app_icon = QtGui.QIcon("res/computer.png")
+        self.computer_icon = QtGui.QIcon("res/computer.png")
+        self.group_icon = QtGui.QIcon("res/group.png")
+        self.server_icon = QtGui.QIcon("res/computer.png")
+        self.database_icon = QtGui.QIcon("res/database.png")
+
         self.verticalLayout = QtGui.QVBoxLayout(MyWin)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.gridLayout = QtGui.QGridLayout()
@@ -43,7 +50,7 @@ class MainWindowUi(object):
         importRdpAction = QtGui.QAction('&Import from *.rdp file', MyWin)
 
         #re-read databases
-        self.refresh_DBAction = QtGui.QAction('&Refresh DB`s', MyWin)
+        self.update_DBAction = QtGui.QAction('&Update DB`s', MyWin)
 
         #exit application
         self.exitAction = QtGui.QAction('&Exit', MyWin)
@@ -79,7 +86,7 @@ class MainWindowUi(object):
         #main menu
         fileMenu = self.mainMenu.addMenu('&Menu')
         fileMenu.addAction(self.settingsAction)
-        fileMenu.addAction(self.refresh_DBAction)
+        fileMenu.addAction(self.update_DBAction)
         fileMenu.addAction(importRdpAction)
         fileMenu.addAction(self.exitAction)
 
@@ -101,7 +108,7 @@ class MainWindowUi(object):
         QtCore.QMetaObject.connectSlotsByName(MyWin)
 
     def retranslateUi(self, MyWin):
-        MyWin.setWindowTitle(_translate("MyWin", "TeleDesk v1.0a", None))
+        MyWin.setWindowTitle(_translate("MyWin", "TeleDesk v1.1", None))
 
     def openMenu(self, position):
 
@@ -128,7 +135,7 @@ class MainWindowUi(object):
             menu.addAction(self.exportToRDPAction)
 
         elif level == -1:
-            menu.addAction(self.refresh_DBAction)
+            menu.addAction(self.update_databases)
 
 
         menu.exec_(self.treeView.viewport().mapToGlobal(position))

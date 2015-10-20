@@ -1,6 +1,7 @@
 # encoding: utf-8
 import os
 import time
+import sys
 import win32crypt
 import binascii
 from PyQt4 import QtGui, QtCore
@@ -18,37 +19,38 @@ from libs.core import db_updater
 
 
 class MyWindow(QtGui.QWidget):
-    # datastorage root element id
+    # datastorage root element identifier
     ROOT_ELEMENT_ID = "1"
-    APP_ICON = "res/computer.png"
-    FOLDER_ICON = "res/folder.png"
-    SERVER_ICON = "res/computer.png"
-
-    """ UI class"""
 
     def __init__(self, parent=None):
-        super(MyWindow, self).__init__()
-        # loading user settings
-        self.user_settings = user_settings.UserSettings()
-        self.user_settings.load_config()
-
         # GUI
+        super(MyWindow, self).__init__()
         QtGui.QWidget.__init__(self, parent)
         self.ui = mainwindow.MainWindowUi()
         self.ui.setupUi(self)
         self.tray_menu = QtGui.QMenu(None)
 
-        # tree view
-        self.show_connections_tree(True)
+        # loading user settings
+        self.user_settings = user_settings.UserSettings()
+        self.user_settings.load_config()
+        self.ui.settingsAction.triggered.connect(self.show_user_settings)
 
-        #updater for all nonlocal  databases
-        self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
-        self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
-                     self.show_msg, QtCore.Qt.QueuedConnection)
-        self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
-                     self.show_connections_tree, QtCore.Qt.QueuedConnection)
-        self.dbupdater.update()
+        # loading database wrappers
+        self.databases = datastorage.DataStorage(self.user_settings.databases)
 
+        # checking passwords for encrypted databases
+        for database in self.user_settings.databases:
+            try:
+                cildlist = self.databases.get_folders_children(
+                    **dict(database=database['Name'], parent = '1'))
+            except:
+                self.show_msg('bad password for base {0}'.format(stor['Name']))
+                return None
+
+        # displaying tree view
+        self.show_connections_tree()
+
+        # buttons event handlers
         self.ui.treeView.doubleClicked.connect(self.init_connection_fromwindow)
         self.ui.treeView.clicked.connect(self.display_item_info)
         self.ui.deleteGroupAction.triggered.connect(self.remove_item)
@@ -56,25 +58,32 @@ class MyWindow(QtGui.QWidget):
         self.ui.addGroupAction.triggered.connect(self.add_new_folder)
         self.ui.addServerAction.triggered.connect(self.add_new_item)
         self.ui.removeServerAction.triggered.connect(self.remove_item)
-        self.ui.settingsAction.triggered.connect(self.show_user_settings)
-        self.ui.refresh_DBAction.triggered.connect(self.show_connections_tree)
+        self.ui.update_DBAction.triggered.connect(self.update_databases)
 
-        # Minimizing to tray
-        style = self.style()
-        # Set the window and tray icon to something
-        # icon = style.standardIcon(QtGui.QStyle.SP_ComputerIcon)
-        icon = MyWindow.APP_ICON
+        # Minimizing to tray and restoring if double-clicked
         self.tray_icon = QtGui.QSystemTrayIcon()
-        self.tray_icon.setIcon(QtGui.QIcon(icon))
-        self.setWindowIcon(QtGui.QIcon(icon))
-
-        # Restore the window when the tray icon is double clicked.
+        self.tray_icon.setIcon(self.ui.computer_icon)
+        self.setWindowIcon(self.ui.computer_icon)
         self.tray_icon.activated.connect(self.restore_window_from_tray)
 
+        #updater for all nonlocal  databases
+        #self.update_databases()
+
+    def update_databases(self):
+
+        self.dbupdater = db_updater.DBUpdater(self.user_settings.databases)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_msg(PyQt_PyObject)"),
+                     self.show_msg, QtCore.Qt.QueuedConnection)
+        self.connect(self.dbupdater, QtCore.SIGNAL("show_connections_tree()"),
+                     self.show_connections_tree, QtCore.Qt.QueuedConnection)
+        self.dbupdater.update()
+
     def show_msg(self, msg):
+
         QtGui.QMessageBox.information(self, "Info", msg, QtGui.QMessageBox.Ok)
 
     def event(self, event):
+
         if (event.type() == QtCore.QEvent.WindowStateChange and
                 self.isMinimized()):
             self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.Tool)
@@ -84,6 +93,7 @@ class MyWindow(QtGui.QWidget):
             return super(MyWindow, self).event(event)
 
     def closeEvent(self, event):
+
         reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                            QtGui.QMessageBox.No)
@@ -100,31 +110,30 @@ class MyWindow(QtGui.QWidget):
             self.remove_item()
 
         # INS key
-        elif event.key() == 16777222:
-            self.add_new_item()
+        #elif event.key() == 16777222:
+        #    self.add_new_item()
 
     def restore_window_from_menu(self):
+
         self.tray_icon.hide()
         self.showNormal()
         self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                                 app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
 
     def restore_window_from_tray(self, reason):
+
+        # if doubleclicked - displaying main window
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
             self.tray_icon.hide()
             self.showNormal()
             self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                                     app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
 
+        # if clicked - displaying most frequently used connections
         if reason == QtGui.QSystemTrayIcon.Trigger:
-
             self.tray_menu.clear()
-
             self.tray_icon.setContextMenu(self.tray_menu)
             self.tray_icon.setToolTip("TeleDesk")
-
-            # self.ui.exitAction.triggered.connect(QtGui.qApp.quit)
-            # self.ui.exitAction = QtGui.QAction('&Exit', MyWindow)
 
             # Title
             self.ui.restore_win = QtGui.QAction("&TeleDesk", self)
@@ -133,24 +142,20 @@ class MyWindow(QtGui.QWidget):
 
             self.tray_menu.addSeparator()
 
-            folder_icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
-            computer_icon = QtGui.QIcon(MyWindow.SERVER_ICON)
-
             for stor in self.user_settings.databases:
                 top_list = self.user_settings.get_top_connections(stor["Name"], 5)
                 if top_list:
+                    node_entry = self.tray_menu.addAction(stor["Name"])
+                    node_entry.setIcon(self.ui.database_icon)
                     for menu_item in top_list:
-                        item = self.ds.get_profile_info(**dict(database=stor["Name"], ID=menu_item))
-                        if item:
-                            node_entry = self.tray_menu.addAction(stor["Name"])
-                            node_entry.setIcon(folder_icon)
-                            entry = self.tray_menu.addAction(item["Name"])
-                            entry.setIcon(computer_icon)
-                            self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                         lambda menu_it=dict(database=stor["Name"], ID=menu_item): self.init_connection_frommenu(
-                                             menu_it))
-
-                            # self.connect(button, SIGNAL("clicked()"), lambda who="Three": self.anyButton(who))
+                        if menu_item:
+                            item = self.databases.get_profile_info(**dict(database=stor["Name"], ID=menu_item))
+                            if item:
+                                entry = self.tray_menu.addAction(item["Name"])
+                                entry.setIcon(self.ui.computer_icon)
+                                self.connect(entry, QtCore.SIGNAL('triggered()'),
+                                             lambda menu_it=dict(database=stor["Name"], ID=menu_item): self.init_connection_frommenu(
+                                                 menu_it))
 
             self.tray_menu.addSeparator()
 
@@ -163,7 +168,6 @@ class MyWindow(QtGui.QWidget):
 
     def show_connections_tree(self, onlylocal=False):
 
-        self.ds = datastorage.DataStorage(self.user_settings.databases)
         model = QtGui.QStandardItemModel()
         model.setHorizontalHeaderLabels(['Name'])
         self.ui.treeView.setModel(model)
@@ -173,23 +177,23 @@ class MyWindow(QtGui.QWidget):
             if onlylocal and stor["Type"] != 'local':
                 continue
             root = QtGui.QStandardItem(stor["Name"])
+            root.setIcon(self.ui.database_icon)
             self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
             model.appendRow(root)
             self.ui.treeView.expand(model.indexFromItem(root))
 
     def fill_tree(self, storage, parent, root):
-        cildlist = self.ds.get_folders_children(**dict(database=storage, parent = parent))
+
+        cildlist = self.databases.get_folders_children(**dict(database=storage, parent = parent))
         if cildlist:
             for chld in cildlist:
                 child_node = QtGui.QStandardItem(chld["Name"])
                 child_node.setData(QtCore.QVariant(chld["ID"]))
 
-                # icon = QtGui.QIcon()
                 if chld["Profile"] == None:
-                    icon = QtGui.QIcon(MyWindow.FOLDER_ICON)
+                    icon = self.ui.group_icon
                 else:
-                    icon = QtGui.QIcon(MyWindow.SERVER_ICON)
-
+                    icon = self.ui.computer_icon
 
                 child_node.setIcon(icon)
                 root.appendRow(child_node)
@@ -197,24 +201,13 @@ class MyWindow(QtGui.QWidget):
 
                 self.fill_tree(storage, chld["ID"], child_node)
 
-    def update_tree(self):
-
-        model = QtGui.QStandardItemModel()
-        model.setHorizontalHeaderLabels(['Name'])
-        self.ui.treeView.setModel(model)
-        for stor in self.user_settings.databases:
-            root = QtGui.QStandardItem(stor["Name"])
-            self.fill_tree(stor["Name"], self.ROOT_ELEMENT_ID, root)
-            model.appendRow(root)
-            self.ui.treeView.expand(model.indexFromItem(root))
-
     def display_item_info(self, index):
 
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
 
         if selected_id:
-            item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
+            item = self.databases.get_profile_info(**dict(database=storage_name, ID = selected_id))
 
             if item.__len__():
                 name = unicode(item["Name"])
@@ -239,35 +232,38 @@ class MyWindow(QtGui.QWidget):
             self.init_connection(storage_name, selected_id)
 
     def init_connection_frommenu(self, menu_item):
+
         self.init_connection(menu_item['database'], menu_item['ID'])
 
     def init_connection(self, storage_name, selected_id):
+
         self.user_settings.update_item_rating(storage_name, selected_id)
-        item = self.ds.get_profile_info(**dict(database=storage_name, ID=selected_id))
+        item = self.databases.get_profile_info(**dict(database=storage_name, ID=selected_id))
         if item:
-            te = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["Name"] + ".rdp")
-            if te:
+            tempfile = serializer.Serializer().serialize_to_file_win_rdp(item, "7.1", item["Name"] + ".rdp")
+            if tempfile:
                 os.startfile(item["Name"] + ".rdp")
                 time.sleep(5)
                 os.remove(item["Name"] + ".rdp")
 
     def edit_item(self):
+
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
 
-        item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
+        item = self.databases.get_profile_info(**dict(database=storage_name, ID = selected_id))
         if item.__len__():
-            input_dialog = itemedit.ItemEditDialog(self.ds,
+            input_dialog = itemedit.ItemEditDialog(self.databases,
                                           {"Storage": storage_name,
                                            "Parent": None,
                                            "ItemData": item,
                                            "Mode": "Edit"})
             input_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
             input_dialog.exec_()
-            self.update_tree()
+            self.show_connections_tree(False)
 
-            item = self.ds.get_profile_info(**dict(database=storage_name, ID = selected_id))
+            item = self.databases.get_profile_info(**dict(database=storage_name, ID = selected_id))
 
             if item.__len__():
                 name = unicode(item["Name"])
@@ -282,58 +278,59 @@ class MyWindow(QtGui.QWidget):
                 self.ui.labelStatus.setText("")
 
     def add_new_item(self):
-        index = self.ui.treeView.selectedIndexes()[0]
-        selected_name = unicode(index.model().itemFromIndex(index).text())
-        storage_name = str(index.model().itemFromIndex(index).parent().text())
-        item = self.ds.get_folder_id(**dict(database=storage_name, Name=selected_name))
 
-        if item:
-            item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddItem"}
-            input_dialog = itemedit.ItemEditDialog(self.ds, item_data)
-            input_dialog.exec_()
-            if input_dialog.updated:
-                self.update_tree()
+        index = self.ui.treeView.selectedIndexes()
+        if index:
+            index = index[0]
+            selected_name = unicode(index.model().itemFromIndex(index).text())
+            storage_name = str(index.model().itemFromIndex(index).parent().text())
+            item = self.databases.get_folder_id(**dict(database=storage_name, Name=selected_name))
+
+            if item:
+                item_data = {"Storage": storage_name, "Parent": str(item["ID"]), "ItemData": None, "Mode": "AddItem"}
+                input_dialog = itemedit.ItemEditDialog(self.databases, item_data)
+                input_dialog.exec_()
+                if input_dialog.updated:
+                    self.show_connections_tree(False)
 
     def add_new_folder(self):
-        index = self.ui.treeView.selectedIndexes()[0]
-        # selected_name = str(index.model().itemFromIndex(index).text())
-        storage_name = str(index.model().itemFromIndex(index).text())
 
-        # item = self.ds.get_folder_id(storage_name, selected_name)
-        # if item.__len__():
-        if 1 == 1:
-            item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
-            inputter = newfolder.NewGroupDialog(self.ds, item_data)
-            inputter.exec_()
-            if inputter.updated:
-                self.update_tree()
+        index = self.ui.treeView.selectedIndexes()[0]
+        storage_name = str(index.model().itemFromIndex(index).text())
+        item_data = {"Storage": storage_name, "Parent": str(1), "ItemData": None, "Mode": "AddFolder"}
+        inputter = newfolder.NewGroupDialog(self.databases, item_data)
+        inputter.exec_()
+        if inputter.updated:
+            self.show_connections_tree(False)
 
     def remove_item(self):
+
         index = self.ui.treeView.selectedIndexes()[0]
         selected_id = str(index.model().itemFromIndex(index).data().toString())
         storage_name = self.get_storage_name(index)
         if selected_id != self.ROOT_ELEMENT_ID:
             # if there are child elements, asking user before deleting
-            child_elements = self.ds.get_child_elements(storage_name, selected_id)
+            child_elements = self.databases.get_child_elements(storage_name, selected_id)
             if child_elements.__len__():
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element with all child elements?",
                                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                    QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
-                    self.ds.delete_group(storage_name, selected_id)
+                    self.databases.delete_group(storage_name, selected_id)
             else:
                 reply = QtGui.QMessageBox.question(self, 'Message', "Delete element?",
                                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                    QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.Yes:
-                    self.ds.delete_group(storage_name, selected_id)
+                    self.databases.delete_group(storage_name, selected_id)
 
-            self.update_tree()
+            self.show_connections_tree(False)
 
     def show_user_settings(self):
+
         settings_dialog = settings.UserSettingsDialog(self.user_settings)
-        # settings_dialog.ui.pushButtonClose.clicked.connect(lambda: input_dialog.close())
         settings_dialog.exec_()
+        self.show_connections_tree(False)
 
     @staticmethod
     def get_storage_name(index):
@@ -348,13 +345,11 @@ class MyWindow(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    import sys
 
     app = QtGui.QApplication(sys.argv)
     app.setStyle("Plastique")
     window = MyWindow()
     window.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
                               app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
-    # window.setSizePolicy(0, 0)
     window.show()
     sys.exit(app.exec_())

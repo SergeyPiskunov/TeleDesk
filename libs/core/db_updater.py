@@ -11,10 +11,12 @@ class DBUpdater(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self.storages = storages
 
+
     def update(self):
         self.start()
 
     def run(self):
+
         for database in self.storages:
             if database["Type"] == 'ftp':
                 FTPConnector = ftp_connector.FTPConnector(database["Properties"])
@@ -24,7 +26,6 @@ class DBUpdater(QtCore.QThread):
                 else:
                     self.emit(QtCore.SIGNAL("show_msg(PyQt_PyObject)"), result["message"])
         self.quit()
-
 
 if __name__ == "__main__":
     pass
