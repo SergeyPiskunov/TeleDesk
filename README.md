@@ -1,4 +1,4 @@
-# ![Alt text](/res/computer.png?raw=true "PC") TeleDesk
+# ![TeleDesk](/res/computer.png?raw=true "TeleDesk") TeleDesk
 TeleDesk helps you to securely store, use and share a big amount of remote desktop connection profiles. 
 
 ####Used technologies:
