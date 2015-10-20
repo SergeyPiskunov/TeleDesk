@@ -1,10 +1,11 @@
-# TeleDesk
+# ![TeleDesk](/res/computer.png?raw=true "TeleDesk") TeleDesk
 TeleDesk helps you to securely store, use and share a big amount of remote desktop connection profiles. 
 
 ####Used technologies:
 - Python 2.7
 - PyQt
 - SQlite
+- pyaes
 
 ####Architecture:
 
@@ -19,9 +20,12 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 - quicklaunch window UI/logic
 - user settings window UI/logic
 - database sharing via FTP
+- database encryption
 
 ###### To do:
 
-- database encryption
 - import/export to *.rdp
 - multilanguage UI
+- full list of rdp 7.1 properties
+
+
