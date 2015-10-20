@@ -19,9 +19,9 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 - quicklaunch window UI/logic
 - user settings window UI/logic
 - database sharing via FTP
-
+- database encryption
 ###### To do:
 
-- database encryption
 - import/export to *.rdp
 - multilanguage UI
+- full list of rdp 7.1 properties
