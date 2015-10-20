@@ -27,3 +27,5 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 - import/export to *.rdp
 - multilanguage UI
 - full list of rdp 7.1 properties
+
+![Alt text](/res/computer.png?raw=true "PC")
