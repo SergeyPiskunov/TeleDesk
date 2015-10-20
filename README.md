@@ -1,4 +1,4 @@
-# TeleDesk
+# ![Alt text](/res/computer.png?raw=true "PC") TeleDesk
 TeleDesk helps you to securely store, use and share a big amount of remote desktop connection profiles. 
 
 ####Used technologies:
@@ -28,4 +28,4 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 - multilanguage UI
 - full list of rdp 7.1 properties
 
-![Alt text](/res/computer.png?raw=true "PC")
+
