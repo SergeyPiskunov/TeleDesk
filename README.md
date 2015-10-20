@@ -5,6 +5,7 @@ TeleDesk helps you to securely store, use and share a big amount of remote deskt
 - Python 2.7
 - PyQt
 - SQlite
+- pyaes
 
 ####Architecture:
 
