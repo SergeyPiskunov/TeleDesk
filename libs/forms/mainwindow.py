@@ -134,8 +134,4 @@ class MainWindowUi(object):
             menu.addAction(self.removeServerAction)
             menu.addAction(self.exportToRDPAction)
 
-        elif level == -1:
-            menu.addAction(self.update_databases)
-
-
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
