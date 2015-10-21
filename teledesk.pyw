@@ -154,8 +154,8 @@ class MyWindow(QtGui.QWidget):
                                 entry = self.tray_menu.addAction(item["Name"])
                                 entry.setIcon(self.ui.computer_icon)
                                 self.connect(entry, QtCore.SIGNAL('triggered()'),
-                                             lambda menu_it=dict(database=stor["Name"], ID=menu_item): self.init_connection_frommenu(
-                                                 menu_it))
+                                             lambda menu_it=dict(database=stor["Name"], ID=menu_item):
+                                             self.init_connection_frommenu(menu_it))
 
             self.tray_menu.addSeparator()
 
