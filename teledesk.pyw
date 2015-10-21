@@ -44,7 +44,7 @@ class MyWindow(QtGui.QWidget):
                 cildlist = self.databases.get_folders_children(
                     **dict(database=database['Name'], parent = '1'))
             except:
-                self.show_msg('bad password for base {0}'.format(stor['Name']))
+                self.show_msg('bad password for base {0}'.format(database['Name']))
                 return None
 
         # displaying tree view
@@ -117,8 +117,10 @@ class MyWindow(QtGui.QWidget):
 
         self.tray_icon.hide()
         self.showNormal()
-        self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
-                                app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
+        self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width()
+                                - window.rect().width() - 15,
+                                app.desktop().screen().availableGeometry().height()
+                                - window.rect().height() - 35))
 
     def restore_window_from_tray(self, reason):
 
@@ -126,8 +128,10 @@ class MyWindow(QtGui.QWidget):
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
             self.tray_icon.hide()
             self.showNormal()
-            self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width() - window.rect().width() - 15,
-                                    app.desktop().screen().availableGeometry().height() - window.rect().height() - 35))
+            self.move(QtCore.QPoint(app.desktop().screen().availableGeometry().width()
+                                    - window.rect().width() - 15,
+                                    app.desktop().screen().availableGeometry().height()
+                                    - window.rect().height() - 35))
 
         # if clicked - displaying most frequently used connections
         if reason == QtGui.QSystemTrayIcon.Trigger:
