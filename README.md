@@ -26,8 +26,8 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 
 ###### To do:
 
-- import/export to *.rdp
-- multilanguage UI
 - full list of rdp 7.1 properties
+- import from *.rdp file
+- multilanguage UI
 
 
