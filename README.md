@@ -1,7 +1,7 @@
 # ![TeleDesk](/res/computer.png?raw=true "TeleDesk") TeleDesk
 TeleDesk helps you to securely store, use and share a big amount of remote desktop connection profiles. 
 
-# ![Main window](/screenshots/main.jpg)  
+# ![Main window](/screenshots/main.jpg)(/screenshots/quicklaunch.jpg)  
 
 ####Used technologies:
 - Python 2.7
