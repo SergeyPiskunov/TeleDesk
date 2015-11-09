@@ -28,9 +28,12 @@ https://docs.google.com/document/d/1pOIUezHtLCjOaxUOI77iCRcTfCBGOIsNiGd0LX39apU/
 - import from *.rdp file
 - multilanguage UI
 
-###### Screenshots:
-
-# ![Main window](/screenshots/main.jpg)
-# ![Quick launch](/screenshots/quicklaunch.jpg)  
+##### Screenshots:
+###### Main window
+<img src="https://github.com/SergeyPiskunov/TeleDesk/blob/master/screenshots/main.jpg">
+###### Most frequently used items
+<img src="https://github.com/SergeyPiskunov/TeleDesk/blob/master/screenshots/quicklaunch.jpg">
+###### User settings
+<img src="https://github.com/SergeyPiskunov/TeleDesk/blob/master/screenshots/settings.jpg" width="480">
 
 
